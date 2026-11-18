@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#FFCF9E">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Accounts Desk">
+<title>Kaveri Accounts Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@500;600;700;800&family=Noto+Sans+Tamil:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#FFF6EC; --panel:#FFFBF6; --accent:#FFE2C2; --accent2:#FFCF9E; --line:#F2B880;
+  --ink:#141414; --ink2:#3A2A1A; --brand:#C2560C; --ok:#0B6B2E; --okbg:#DDF3E3;
+  --warn:#7A4A00; --warnbg:#FFF0C2; --bad:#9B1C1C; --badbg:#FFE0DC; --info:#123C73; --infobg:#E3EEFF;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans","Noto Sans Tamil",system-ui,sans-serif;font-weight:600;font-size:15px;line-height:1.45}
+h1,h2,h3{margin:0;font-weight:800;color:var(--ink)}
+h2{font-size:20px} h3{font-size:16px}
+a{color:var(--brand);font-weight:800}
+header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:2px solid var(--line);padding:10px 14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.logo{display:flex;align-items:center;gap:8px}
+.logo b{font-size:18px;font-weight:800}
+.logo small{display:block;font-size:12px;color:var(--ink2)}
+.grow{flex:1}
+select,input,textarea{font:inherit;font-weight:600;color:var(--ink);background:#FFFDF9;border:2px solid var(--line);border-radius:8px;padding:7px 9px;min-width:0}
+textarea{width:100%;min-height:90px}
+input:focus,select:focus,textarea:focus{outline:3px solid var(--accent2);border-color:var(--brand)}
+button{font:inherit;font-weight:800;color:var(--ink);background:var(--accent);border:2px solid var(--line);border-radius:9px;padding:8px 13px;cursor:pointer}
+button:hover{background:var(--accent2)}
+button.primary{background:var(--accent2);border-color:var(--brand)}
+button.primary:hover{background:#FFB86E}
+button.danger{background:var(--badbg);border-color:#E7A49B;color:var(--bad)}
+button.small{padding:4px 9px;font-size:13px}
+button:disabled{opacity:.5;cursor:not-allowed}
+nav{display:flex;gap:6px;overflow-x:auto;padding:8px 14px;border-bottom:2px solid var(--line);background:var(--panel);position:sticky;top:58px;z-index:19}
+nav button{white-space:nowrap;background:transparent;border-color:transparent}
+nav button.on{background:var(--accent2);border-color:var(--brand)}
+main{max-width:1180px;margin:0 auto;padding:16px 14px 90px}
+.card{background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--ink2);font-weight:800}
+label.f input,label.f select{width:100%}
+.muted{color:var(--ink2);font-size:13px}
+ul.tight{margin:6px 0;padding-left:20px} ul.tight li{margin:2px 0}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{border-bottom:1.5px solid var(--accent2);padding:6px 7px;text-align:left;vertical-align:top}
+th{background:var(--accent);font-weight:800}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+.tw{overflow-x:auto}
+.pill{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:800;border:1.5px solid}
+.p-ok{background:var(--okbg);color:var(--ok);border-color:#9FD5AE}
+.p-warn{background:var(--warnbg);color:var(--warn);border-color:#E8C96A}
+.p-bad{background:var(--badbg);color:var(--bad);border-color:#E7A49B}
+.p-info{background:var(--infobg);color:var(--info);border-color:#A9C3EE}
+.p-n{background:var(--accent);color:var(--ink);border-color:var(--line)}
+.kpi{background:var(--accent);border:2px solid var(--line);border-radius:12px;padding:10px 12px}
+.kpi b{display:block;font-size:24px;font-weight:800}
+.kpi span{font-size:13px;color:var(--ink2)}
+.chk{margin:4px 0;padding:6px 9px;border-radius:8px;font-size:13.5px}
+.chk.ok{background:var(--okbg);color:var(--ok)} .chk.warn{background:var(--warnbg);color:var(--warn)} .chk.bad{background:var(--badbg);color:var(--bad)} .chk.info{background:var(--infobg);color:var(--info)}
+.drop{border:3px dashed var(--brand);border-radius:14px;padding:26px;text-align:center;background:var(--accent);cursor:pointer}
+.drop.hot{background:var(--accent2)}
+.task{display:grid;grid-template-columns:64px 1fr auto;gap:12px;align-items:center;padding:10px;border:2px solid var(--line);border-radius:12px;margin-bottom:8px;background:#FFFDF9}
+.datebox{text-align:center;border-radius:10px;padding:5px 0;background:var(--accent);border:2px solid var(--line)}
+.datebox b{display:block;font-size:22px;line-height:1}
+.datebox span{font-size:11px;font-weight:800}
+.datebox.late{background:var(--badbg);border-color:#E7A49B;color:var(--bad)}
+.datebox.soon{background:var(--warnbg);border-color:#E8C96A;color:var(--warn)}
+.datebox.done{background:var(--okbg);border-color:#9FD5AE;color:var(--ok)}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink2);color:#FFF6EC;padding:10px 16px;border-radius:10px;font-weight:800;display:none;z-index:99;max-width:90vw}
+.modal{position:fixed;inset:0;background:rgba(40,20,0,.45);display:none;align-items:center;justify-content:center;z-index:50;padding:14px}
+.modal.on{display:flex}
+.modal .box{background:var(--panel);border:3px solid var(--brand);border-radius:16px;max-width:560px;width:100%;max-height:92vh;overflow:auto;padding:18px}
+.lock{font-size:40px;line-height:1}
+.billhead{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+.lines input{width:100%}
+.vch td{font-size:13px}
+.sep{height:2px;background:var(--accent2);margin:12px 0;border:0}
+.banner{padding:10px 12px;border-radius:10px;margin-bottom:12px;font-size:14px}
+svg text{font-family:"Noto Sans",sans-serif;font-weight:800}
+@media (max-width:640px){ nav{top:96px} .task{grid-template-columns:54px 1fr} .task .acts{grid-column:1/-1} }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect x="1" y="1" width="32" height="32" rx="9" fill="#FFCF9E" stroke="#C2560C" stroke-width="2"/><path d="M9 11h16M9 17h16M9 23h10" stroke="#141414" stroke-width="3" stroke-linecap="round"/></svg>
+    <div><b>Kaveri Accounts Desk</b><small>Bills → Tally → GST &amp; TDS</small></div>
+  </div>
+  <div class="grow"></div>
+  <label class="row" style="gap:6px"><span class="muted">Company</span><select id="coSel"></select></label>
+  <span id="storeMode" class="pill p-n">Connecting…</span>
+</header>
+<nav id="nav"></nav>
+<main id="main"></main>
+<div id="toast"></div>
+<div class="modal" id="modal"><div class="box" id="modalBox"></div></div>
+<input type="file" id="fileIn" accept="image/*,application/pdf" multiple hidden>
+<input type="file" id="ledgerIn" accept=".csv,.txt,.xlsx,.xls,.xml" hidden>
+<input type="file" id="b2bIn" accept=".json" hidden>
+<input type="file" id="restoreIn" accept=".json" hidden>
+
+<script>
+/*CORE-START*/
+// ---------- pure helpers (tested offline) ----------
+const STATES={"01":"Jammu and Kashmir","02":"Himachal Pradesh","03":"Punjab","04":"Chandigarh","05":"Uttarakhand","06":"Haryana","07":"Delhi","08":"Rajasthan","09":"Uttar Pradesh","10":"Bihar","11":"Sikkim","12":"Arunachal Pradesh","13":"Nagaland","14":"Manipur","15":"Mizoram","16":"Tripura","17":"Meghalaya","18":"Assam","19":"West Bengal","20":"Jharkhand","21":"Odisha","22":"Chhattisgarh","23":"Madhya Pradesh","24":"Gujarat","26":"Dadra and Nagar Haveli and Daman and Diu","27":"Maharashtra","29":"Karnataka","30":"Goa","31":"Lakshadweep","32":"Kerala","33":"Tamil Nadu","34":"Puducherry","35":"Andaman and Nicobar Islands","36":"Telangana","37":"Andhra Pradesh","38":"Ladakh","97":"Other Territory"};
+const QRMP_GROUP1=["22","23","24","25","26","27","29","30","31","32","33","34","35","36","37"];
+const GST_RATES=[0,3,5,12,18,28,40];
+const r2=x=>Math.round((+x||0)*100)/100;
+const fmt=x=>(+x||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const xesc=esc;
+const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+const invNorm=s=>String(s||'').toUpperCase().replace(/\d+/g,n=>n.replace(/^0+(?=\d)/,'')).replace(/[^A-Z0-9]/g,'');
+
+function gstinValid(g){
+  g=String(g||'').toUpperCase().trim();
+  if(!/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/.test(g)) return false;
+  const cs='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'; let sum=0;
+  for(let i=0;i<14;i++){ const v=cs.indexOf(g[i])*(i%2?2:1); sum+=Math.floor(v/36)+(v%36); }
+  return cs[(36-(sum%36))%36]===g[14];
+}
+function stateOf(gstin){ const c=String(gstin||'').slice(0,2); return STATES[c]?c:''; }
+
+// GST + TDS due-date calendar. y,m = the month in which tasks fall due (m 1-12).
+function dueTasks(co,y,m){
+  const out=[]; const d=(dd,mm=m,yy=y)=>{const x=new Date(yy,mm-1,1); const last=new Date(yy,mm,0).getDate(); return new Date(yy,mm-1,Math.min(dd,last));};
+  const pm=m===1?12:m-1, py=m===1?y-1:y; const per=`${py}-${String(pm).padStart(2,'0')}`;
+  const mn=n=>['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][n-1];
+  const perLabel=`${mn(pm)} ${py}`;
+  const qEnd=[3,6,9,12].includes(pm); const qLabel=()=>{const s=pm-2; return `${mn(s)}–${mn(pm)} ${py}`;};
+  if(co.gstin){
+    if((co.gstFreq||'monthly')==='monthly'){
+      out.push({key:`GSTR1_${per}`,kind:'gst',title:'GSTR-1 (outward supplies)',period:perLabel,due:d(11),portal:'gst'});
+      out.push({key:`GSTR3B_${per}`,kind:'gst',title:'GSTR-3B (summary + tax payment)',period:perLabel,due:d(20),portal:'gst'});
+    } else {
+      if(qEnd){
+        const grp=co.qrmpDay||(QRMP_GROUP1.includes(stateOf(co.gstin))?22:24);
+        out.push({key:`GSTR1Q_${per}`,kind:'gst',title:'GSTR-1 quarterly (QRMP)',period:qLabel(),due:d(13),portal:'gst'});
+        out.push({key:`GSTR3BQ_${per}`,kind:'gst',title:'GSTR-3B quarterly (QRMP)',period:qLabel(),due:d(grp),portal:'gst'});
+      } else {
+        out.push({key:`IFF_${per}`,kind:'gst',title:'IFF – B2B invoices (optional, QRMP)',period:perLabel,due:d(13),portal:'gst',optional:true});
+        out.push({key:`PMT06_${per}`,kind:'gst',title:'PMT-06 – monthly GST payment (QRMP)',period:perLabel,due:d(25),portal:'gst'});
+      }
+    }
+  }
+  if(co.tan){
+    // TDS deposit: 7th of next month; March deductions by 30 April
+    out.push({key:`TDSPAY_${per}`,kind:'tds',title:'TDS deposit (challan)',period:perLabel,due:pm===3?d(30):d(7),portal:'it'});
+    const retMap={7:[6,'Q1 (Apr–Jun)'],10:[9,'Q2 (Jul–Sep)'],1:[12,'Q3 (Oct–Dec)'],5:[3,'Q4 (Jan–Mar)']};
+    if(retMap[m]){
+      const [qm,ql]=retMap[m]; const qy=m===1?y-1:y; const fy=qm<=3?qy-1:qy;
+      const lastMonthOfQ = new Date(qy,qm-1,1); const isNew = lastMonthOfQ>=new Date(2026,3,1);
+      const forms=isNew?'Form 140 (non-salary) / Form 138 (salary)':'Form 26Q (non-salary) / Form 24Q (salary)';
+      out.push({key:`TDSRET_${qy}-${String(qm).padStart(2,'0')}`,kind:'tds',title:`TDS return ${ql} – ${forms}`,period:`${ql} FY ${fy}-${String((fy+1)%100).padStart(2,'0')}`,due:d(31),portal:'it'});
+    }
+    const certMap={8:[6,'Q1'],11:[9,'Q2'],2:[12,'Q3'],6:[3,'Q4']};
+    if(certMap[m]){
+      const [qm,ql]=certMap[m]; const qy=m===2?y-1:y;
+      out.push({key:`TDSCERT_${qy}-${String(qm).padStart(2,'0')}`,kind:'tds',title:`TDS certificates to parties – ${ql}`,period:`${ql}`,due:d(15),portal:'traces'});
+    }
+  }
+  return out.map(t=>({...t,dueISO:isoDate(t.due)}));
+}
+function isoDate(dt){return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;}
+
+// Totals and checks for one bill against a company.
+function billCalc(b){
+  const lines=b.lines||[];
+  const taxable=r2(lines.reduce((s,l)=>s+(+l.taxable||0),0));
+  const cgst=r2(lines.reduce((s,l)=>s+(+l.cgst||0),0));
+  const sgst=r2(lines.reduce((s,l)=>s+(+l.sgst||0),0));
+  const igst=r2(lines.reduce((s,l)=>s+(+l.igst||0),0));
+  const cess=r2(lines.reduce((s,l)=>s+(+l.cess||0),0));
+  const ro=r2(b.roundOff||0);
+  const computed=r2(taxable+cgst+sgst+igst+cess+ro);
+  const tds=b.tds&&b.tds.on?r2(Math.round((+b.tds.base||taxable)*(+b.tds.rate||0)/100)):0;
+  return {taxable,cgst,sgst,igst,cess,ro,computed,total:r2(b.total||computed),tds,party:r2((b.total||computed)-tds)};
+}
+function billChecks(b,co,ledgerSet,otherBills){
+  const c=billCalc(b), out=[]; const add=(lvl,msg)=>out.push({lvl,msg});
+  if(!b.supplierName) add('bad','Supplier name missing');
+  if(!b.invoiceNo) add('bad','Invoice number missing');
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(b.invoiceDate||'')) add('bad','Invoice date missing or unclear');
+  else { const dt=new Date(b.invoiceDate); if(dt>new Date()) add('bad','Invoice date is in the future'); }
+  if(b.supplierGSTIN){
+    if(!gstinValid(b.supplierGSTIN)) add('bad',`Supplier GSTIN ${b.supplierGSTIN} fails the GSTIN check-digit test – re-read it`);
+    else add('ok','Supplier GSTIN format and check digit OK');
+    const sc=stateOf(b.supplierGSTIN), cc=stateOf(co.gstin);
+    if(sc&&cc){
+      if(sc===cc && c.igst>0) add('bad','Same-state supplier but IGST charged – should be CGST + SGST');
+      if(sc!==cc && (c.cgst>0||c.sgst>0)) add('bad','Other-state supplier but CGST/SGST charged – should be IGST');
+    }
+  } else if(c.cgst+c.sgst+c.igst>0) add('bad','GST charged but supplier GSTIN missing – no input credit without it');
+  else add('info','Unregistered supplier / no GST on bill');
+  (b.lines||[]).forEach((l,i)=>{
+    const rt=+l.rate||0, tx=+l.taxable||0, tax=(+l.cgst||0)+(+l.sgst||0)+(+l.igst||0);
+    if(Math.abs(tax-tx*rt/100)>Math.max(1,lines_tol(tx))) add('warn',`Line ${i+1}: tax ${fmt(tax)} ≠ ${rt}% of ${fmt(tx)} (${fmt(tx*rt/100)})`);
+    if(Math.abs((+l.cgst||0)-(+l.sgst||0))>0.5) add('bad',`Line ${i+1}: CGST and SGST are not equal`);
+    if(!GST_RATES.includes(rt)) add('warn',`Line ${i+1}: unusual GST rate ${rt}%`);
+  });
+  if(Math.abs(c.computed-c.total)>1) add('bad',`Bill total ${fmt(c.total)} ≠ taxable + tax + round-off ${fmt(c.computed)}`);
+  else add('ok','Totals add up');
+  if(Math.abs(c.ro)>1) add('warn',`Round-off ${fmt(c.ro)} is more than ₹1`);
+  const dup=(otherBills||[]).find(o=>o.id!==b.id && invNorm(o.invoiceNo)===invNorm(b.invoiceNo) && (norm(o.supplierGSTIN)===norm(b.supplierGSTIN)) && norm(o.supplierName).slice(0,6)===norm(b.supplierName).slice(0,6));
+  if(dup) add('bad',`Possible duplicate: same supplier & invoice no. already entered (${dup.status})`);
+  if(ledgerSet && ledgerSet.size){
+    const pl=b.partyLedger||b.supplierName;
+    if(!ledgerSet.has(norm(pl))) add('warn',`Party ledger “${pl}” not in Tally list – it will be created under Sundry Creditors`);
+    (b.lines||[]).forEach((l,i)=>{ if(l.ledger && !ledgerSet.has(norm(l.ledger))) add('bad',`Line ${i+1}: ledger “${l.ledger}” not found in Tally`); });
+    taxLedgers(b,co).forEach(n=>{ if(!ledgerSet.has(norm(n))) add('bad',`Tax ledger “${n}” not found in Tally`); });
+    if(b.tds&&b.tds.on&&b.tds.ledger&&!ledgerSet.has(norm(b.tds.ledger))) add('bad',`TDS ledger “${b.tds.ledger}” not found in Tally`);
+  } else add('warn','Tally ledger list not loaded for this company – ledger names not checked');
+  (b.lines||[]).forEach((l,i)=>{ if(!l.ledger) add('bad',`Line ${i+1}: choose the purchase/expense ledger`); });
+  if(b.tds&&b.tds.on){ if(!b.tds.ledger) add('bad','TDS ticked but TDS ledger not chosen'); if(!(+b.tds.rate>0)) add('bad','TDS ticked but rate missing'); }
+  if(/^\d{4}-\d{2}-\d{2}$/.test(b.invoiceDate||'')){
+    const dt=new Date(b.invoiceDate); const fyEnd=dt.getMonth()>=3?dt.getFullYear()+1:dt.getFullYear();
+    const itcLast=new Date(fyEnd,10,30); if(new Date()>itcLast && (c.cgst+c.igst)>0) add('warn','ITC time limit (30 Nov after the financial year) may have passed for this bill');
+  }
+  return out;
+}
+function lines_tol(tx){return tx*0.002;}
+function rateMap(co,rate){ return (co.rateLedgers||{})[rate]||{}; }
+function taxLedgers(b,co){
+  const s=new Set(); (b.lines||[]).forEach(l=>{ const m=rateMap(co,+l.rate||0);
+    if(+l.cgst) s.add(m.cgst||co.cgstLedger||'Input CGST'); if(+l.sgst) s.add(m.sgst||co.sgstLedger||'Input SGST'); if(+l.igst) s.add(m.igst||co.igstLedger||'Input IGST'); if(+l.cess) s.add(co.cessLedger||'Input Cess'); });
+  if(+b.roundOff) s.add(co.roundOffLedger||'Round Off');
+  return [...s];
+}
+// Ledger entries: debit = negative amount + ISDEEMEDPOSITIVE Yes; credit = positive + No.
+function voucherEntries(b,co){
+  const c=billCalc(b), E=[]; const agg={};
+  const put=(name,amt)=>{ if(!name||!r2(amt)) return; agg[name]=r2((agg[name]||0)+amt); };
+  (b.lines||[]).forEach(l=>{ const m=rateMap(co,+l.rate||0);
+    put(l.ledger,+l.taxable);
+    put(m.cgst||co.cgstLedger||'Input CGST',+l.cgst); put(m.sgst||co.sgstLedger||'Input SGST',+l.sgst); put(m.igst||co.igstLedger||'Input IGST',+l.igst); put(co.cessLedger||'Input Cess',+l.cess); });
+  if(c.ro) put(co.roundOffLedger||'Round Off',c.ro);
+  const party=b.partyLedger||b.supplierName;
+  E.push({ledger:party,dr:0,cr:c.party,party:true});
+  if(c.tds) E.push({ledger:b.tds.ledger,dr:0,cr:c.tds});
+  Object.entries(agg).forEach(([n,a])=>{ if(a>0) E.push({ledger:n,dr:a,cr:0}); else E.push({ledger:n,dr:0,cr:-a}); });
+  const dr=r2(E.reduce((s,e)=>s+e.dr,0)), cr=r2(E.reduce((s,e)=>s+e.cr,0));
+  return {entries:E,dr,cr,balanced:Math.abs(dr-cr)<0.01};
+}
+function tallyXML(bills,co,ledgerSet,opts={}){
+  const ymd=s=>String(s||'').replace(/-/g,'');
+  const amt=n=>r2(n).toFixed(2);
+  let msgs='';
+  if(opts.createParties!==false){
+    const seen=new Set();
+    bills.forEach(b=>{ const p=b.partyLedger||b.supplierName; const k=norm(p);
+      if(seen.has(k)|| (ledgerSet&&ledgerSet.has(k))) return; seen.add(k);
+      const st=STATES[stateOf(b.supplierGSTIN)]||STATES[stateOf(co.gstin)]||'';
+      msgs+=`<TALLYMESSAGE xmlns:UDF="TallyUDF"><LEDGER NAME="${xesc(p)}" ACTION="Create"><NAME.LIST><NAME>${xesc(p)}</NAME></NAME.LIST><PARENT>${xesc(co.creditorGroup||'Sundry Creditors')}</PARENT><ISBILLWISEON>Yes</ISBILLWISEON>${b.supplierGSTIN?`<GSTREGISTRATIONTYPE>Regular</GSTREGISTRATIONTYPE><PARTYGSTIN>${xesc(b.supplierGSTIN)}</PARTYGSTIN>`:`<GSTREGISTRATIONTYPE>Unregistered</GSTREGISTRATIONTYPE>`}${st?`<LEDSTATENAME>${xesc(st)}</LEDSTATENAME><STATENAME>${xesc(st)}</STATENAME>`:''}<COUNTRYNAME>India</COUNTRYNAME></LEDGER></TALLYMESSAGE>\n`; });
+  }
+  bills.forEach(b=>{
+    const v=voucherEntries(b,co); const vt=b.voucherType||co.purchaseVchType||'Purchase';
+    const party=b.partyLedger||b.supplierName; const c=billCalc(b);
+    const st=STATES[stateOf(b.supplierGSTIN)]||'';
+    let le='';
+    v.entries.forEach(e=>{
+      const isDr=e.dr>0; const a=isDr?-e.dr:e.cr;
+      le+=`<ALLLEDGERENTRIES.LIST><LEDGERNAME>${xesc(e.ledger)}</LEDGERNAME><ISDEEMEDPOSITIVE>${isDr?'Yes':'No'}</ISDEEMEDPOSITIVE>${e.party?'<ISPARTYLEDGER>Yes</ISPARTYLEDGER>':''}<AMOUNT>${amt(a)}</AMOUNT>${e.party?`<BILLALLOCATIONS.LIST><NAME>${xesc(b.invoiceNo)}</NAME><BILLTYPE>New Ref</BILLTYPE><AMOUNT>${amt(a)}</AMOUNT></BILLALLOCATIONS.LIST>`:''}</ALLLEDGERENTRIES.LIST>`;
+    });
+    const narr=`Bill ${b.invoiceNo} dt ${b.invoiceDate} – ${b.supplierName}${b.narration?' – '+b.narration:''} [KAD:${b.id}]`;
+    msgs+=`<TALLYMESSAGE xmlns:UDF="TallyUDF"><VOUCHER VCHTYPE="${xesc(vt)}" ACTION="Create" OBJVIEW="Accounting Voucher View"><DATE>${ymd(b.postDate||b.invoiceDate)}</DATE><EFFECTIVEDATE>${ymd(b.postDate||b.invoiceDate)}</EFFECTIVEDATE><VOUCHERTYPENAME>${xesc(vt)}</VOUCHERTYPENAME><REFERENCE>${xesc(b.invoiceNo)}</REFERENCE><REFERENCEDATE>${ymd(b.invoiceDate)}</REFERENCEDATE><PARTYLEDGERNAME>${xesc(party)}</PARTYLEDGERNAME>${b.supplierGSTIN?`<PARTYGSTIN>${xesc(b.supplierGSTIN)}</PARTYGSTIN>`:''}${st?`<STATENAME>${xesc(st)}</STATENAME><PLACEOFSUPPLY>${xesc(STATES[stateOf(co.gstin)]||st)}</PLACEOFSUPPLY>`:''}<PERSISTEDVIEW>Accounting Voucher View</PERSISTEDVIEW><ISINVOICE>No</ISINVOICE><NARRATION>${xesc(narr)}</NARRATION>${le}</VOUCHER></TALLYMESSAGE>\n`;
+  });
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<ENVELOPE><HEADER><TALLYREQUEST>Import Data</TALLYREQUEST></HEADER><BODY><IMPORTDATA><REQUESTDESC><REPORTNAME>Vouchers</REPORTNAME><STATICVARIABLES><SVCURRENTCOMPANY>${xesc(co.tallyName||co.name)}</SVCURRENTCOMPANY></STATICVARIABLES></REQUESTDESC><REQUESTDATA>\n${msgs}</REQUESTDATA></IMPORTDATA></BODY></ENVELOPE>\n`;
+}
+// GSTR-2B JSON → flat invoices
+function parse2B(j){
+  const root=j?.data?.docdata||j?.docdata||j?.data||j; const b2b=root?.b2b||[]; const out=[];
+  b2b.forEach(s=>{ (s.inv||[]).forEach(iv=>{ const it=iv.items||iv.itms||[]; let tx=0,ig=0,cg=0,sg=0;
+    it.forEach(x=>{const d=x.itm_det||x; tx+=+d.txval||0; ig+=+d.igst||+d.iamt||0; cg+=+d.cgst||+d.camt||0; sg+=+d.sgst||+d.samt||0;});
+    if(!it.length){tx=+iv.txval||0; ig=+iv.igst||0; cg=+iv.cgst||0; sg=+iv.sgst||0;}
+    out.push({gstin:s.ctin,name:s.trdnm||'',inv:iv.inum,dt:iv.dt,val:+iv.val||0,txval:r2(tx),tax:r2(ig+cg+sg),itcavl:iv.itcavl}); }); });
+  return out;
+}
+function match2B(bills,b2b){
+  const key=(g,i)=>String(g||'').toUpperCase()+'|'+invNorm(i);
+  const bm=new Map(); bills.forEach(b=>bm.set(key(b.supplierGSTIN,b.invoiceNo),b));
+  const matched=[],only2b=[],seen=new Set();
+  b2b.forEach(r=>{ const k=key(r.gstin,r.inv); const b=bm.get(k);
+    if(b){ seen.add(k); const c=billCalc(b); const diff=r2((c.cgst+c.sgst+c.igst)-r.tax); matched.push({b,r,diff}); } else only2b.push(r); });
+  const onlyBooks=bills.filter(b=>b.supplierGSTIN && !seen.has(key(b.supplierGSTIN,b.invoiceNo)));
+  return {matched,only2b,onlyBooks};
+}
+/*CORE-END*/
+</script>
+
+<script>
+// ---------- app ----------
+const S={companies:[],cid:null,bills:[],tasks:{},ledgers:[],ledgerSet:new Set(),logs:[],tab:'home',month:null,queue:[],b2b:null,editing:null,canWrite:true};
+const now=new Date(); S.month=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+const $=s=>document.querySelector(s);
+const toast=(m,ms=2600)=>{const t=$('#toast'); t.textContent=m; t.style.display='block'; clearTimeout(t._h); t._h=setTimeout(()=>t.style.display='none',ms);};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const co=()=>S.companies.find(c=>c.id===S.cid)||null;
+const PORTALS={gst:{name:'GST portal',url:'https://services.gst.gov.in/services/login',host:'gst.gov.in'},it:{name:'Income Tax e-filing portal',url:'https://eportal.incometax.gov.in/iec/foservices/#/login',host:'incometax.gov.in'},traces:{name:'TRACES',url:'https://www.tdscpc.gov.in/app/login.xhtml',host:'tdscpc.gov.in'}};
+const STEPS={
+ GSTR1:['Check sales vouchers in Tally for the period','Tally: Display → Statutory Reports → GST → GSTR-1 → export JSON','Portal: Returns Dashboard → GSTR-1 → Prepare offline → upload JSON','Preview, then file with EVC (OTP) or DSC'],
+ GSTR3B:['File GSTR-1 first – 3B auto-fills from it','Check GSTR-2B ITC vs purchase book (GST tab → 2B match)','Portal: GSTR-3B → check auto-filled tables, edit ITC if needed','Pay tax via cash/credit ledger, then file with EVC (OTP) or DSC'],
+ GSTR1Q:['Same as GSTR-1, for the full quarter'], GSTR3BQ:['Same as GSTR-3B, for the full quarter'],
+ IFF:['Optional: upload B2B sales invoices so buyers get ITC early'],
+ PMT06:['Portal: Payment → Create challan → reason “Monthly payment for quarterly return”','Pay by net banking; note CPIN/CIN'],
+ TDSPAY:['TDS tab: check TDS deducted this month by section','Portal: e-Pay Tax → challan for TDS (non-salary / salary)','Pay; note CIN, BSR code, challan serial no. and date'],
+ TDSRET:['TDS tab → export quarter register (CSV)','Prepare the return file in the government utility (RPU) and validate with FVU','e-filing portal: e-File → Income Tax Forms → TDS → upload','Verify with EVC (OTP) or DSC; note token number'],
+ TDSCERT:['TRACES: Downloads → request TDS certificates for the quarter','Download, sign and send to each party']
+};
+const stepKey=k=>k.split('_')[0];
+
+// ---------- storage: cloud db, or this-browser fallback ----------
+const Store={mode:'local',db:null,subs:[],mem:{},
+  async init(){
+    let db=null; try{ if(window.claude&&claude.use){ db=await claude.use('db'); } }catch(e){}
+    if(db){ this.db=db; this.mode='cloud'; try{ this.user=await claude.use('user'); this.me=this.user? await this.user.id():null; }catch(e){} }
+    else { try{ this.mem=JSON.parse(localStorage.getItem('kad_store')||'{}'); }catch(e){ this.mem={}; } }
+    try{ this.dl=window.claude&&claude.use? await claude.use('downloads'):null; }catch(e){}
+    try{ const sm=window.claude&&claude.use? await claude.use('sample'):null; if(sm){ let lim=null; try{ lim=await sm.limits(); }catch(e){} this.ai=sm; this.aiImages=!lim||!!lim.images; } }catch(e){}
+  },
+  _persist(){ try{ localStorage.setItem('kad_store',JSON.stringify(this.mem)); }catch(e){} this.subs.forEach(s=>s.fire()); },
+  sub(coll,cid,cb){
+    if(this.mode==='cloud'){
+      let q=this.db.collection(coll); if(cid) q=q.where('cid','==',cid);
+      let timer=setTimeout(()=>toast('Data is slow to load – check your connection'),10000);
+      return q.onSnapshot(s=>{ if(!s.metadata.fromCache) clearTimeout(timer); cb(s.docs.map(d=>({...JSON.parse(JSON.stringify(d.data())),id:d.id}))); },e=>{clearTimeout(timer); toast('Could not load '+coll+': '+e.code);});
+    }
+    const s={fire:()=>{ const all=Object.entries(this.mem[coll]||{}).map(([id,v])=>({...JSON.parse(JSON.stringify(v)),id})); cb(cid?all.filter(x=>x.cid===cid):all); }};
+    this.subs.push(s); s.fire(); return ()=>{this.subs=this.subs.filter(x=>x!==s);};
+  },
+  async set(coll,id,data){
+    const clean=JSON.parse(JSON.stringify({...data,id:undefined}));
+    if(this.mode==='cloud'){ try{ await this.db.collection(coll).doc(id).set(clean); }catch(e){ if(e.code==='invalid_argument'){S.canWrite=false; toast('You have view-only access – changes are not saved');} else toast('Save failed: '+(e.message||e.code)); throw e; } return; }
+    (this.mem[coll]=this.mem[coll]||{})[id]=clean; this._persist();
+  },
+  async del(coll,id){ if(this.mode==='cloud') return this.db.collection(coll).doc(id).delete(); if(this.mem[coll]) delete this.mem[coll][id]; this._persist(); },
+  async get(coll,id){ if(this.mode==='cloud'){ const s=await this.db.collection(coll).doc(id).get(); return s.exists?{...s.data(),id}:null; } const v=(this.mem[coll]||{})[id]; return v?{...v,id}:null; }
+};
+async function logIt(msg){
+  const c=co(); if(!c) return; const ym=isoDate(new Date()).slice(0,7); const id=`${c.id}_${ym.replace('-','')}`;
+  const cur=(await Store.get('logs',id))||{cid:c.id,month:ym,entries:[]};
+  cur.entries=[{t:new Date().toISOString(),by:Store.me||'local',msg},...(cur.entries||[])].slice(0,400);
+  await Store.set('logs',id,cur);
+}
+async function saveFile(filename,data,label){
+  if(Store.dl){ try{ await Store.dl.save({filename,data}); toast('Saved '+filename); return 'saved'; }catch(e){ if(e.code==='declined'){toast('Download cancelled'); return 'declined';} } }
+  if(!window.claude){ try{ const blob=new Blob([data],{type:'application/octet-stream'}); const u=URL.createObjectURL(blob); const el=document.createElement('a'); el.href=u; el.download=filename; document.body.appendChild(el); el.click(); el.remove(); setTimeout(()=>URL.revokeObjectURL(u),4000); toast('Saved '+filename); return 'saved'; }catch(e){} }
+  showText(label||filename,data); return 'shown';
+}
+function showText(title,text){
+  openModal(`<h3>${esc(title)}</h3><p class="muted">Download isn't available here – copy the text below and save it as a file.</p><textarea id="cpTxt" style="min-height:260px;font-family:monospace;font-size:12px">${esc(text)}</textarea><div class="row" style="margin-top:10px"><button class="primary" data-act="copyTxt">Copy</button><button data-act="close">Close</button></div>`);
+}
+
+// ---------- subscriptions ----------
+let unsub=[];
+function subscribeCompany(){
+  unsub.forEach(u=>{try{u()}catch(e){}}); unsub=[]; S.bills=[]; S.tasks={}; S.ledgers=[]; S.ledgerSet=new Set(); S.logs=[];
+  const c=co(); if(!c){render(); return;}
+  unsub.push(Store.sub('bills',c.id,list=>{S.bills=list.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||'')); render();}));
+  unsub.push(Store.sub('tasks',c.id,list=>{S.tasks={}; list.forEach(t=>S.tasks[t.key]=t); render();}));
+  unsub.push(Store.sub('ledgers',c.id,list=>{ S.ledgers=list.flatMap(d=>d.names||[]); S.ledgerSet=new Set(S.ledgers.map(norm)); render();}));
+  unsub.push(Store.sub('logs',c.id,list=>{ S.logs=list.flatMap(d=>d.entries||[]).sort((a,b)=>b.t.localeCompare(a.t)); render();}));
+}
+let allTaskSub=null; S.allTasks={};
+function subscribeAll(){
+  Store.sub('companies',null,list=>{ S.companies=list.sort((a,b)=>(a.short||a.name||'').localeCompare(b.short||b.name||''));
+    if(!S.cid||!co()){ let saved=null; try{saved=localStorage.getItem('kad_cid')}catch(e){} S.cid=(S.companies.find(c=>c.id===saved)||S.companies[0]||{}).id||null; subscribeCompany(); }
+    renderCoSel(); render(); });
+  allTaskSub=Store.sub('tasks',null,list=>{ S.allTasks={}; list.forEach(t=>S.allTasks[t.cid+'|'+t.key]=t); render(); });
+}
+function renderCoSel(){
+  $('#coSel').innerHTML = S.companies.length? S.companies.map(c=>`<option value="${c.id}" ${c.id===S.cid?'selected':''}>${esc(c.short||c.name)}</option>`).join('') : '<option>— add a company —</option>';
+}
+$('#coSel').onchange=e=>{ S.cid=e.target.value; S.coDraft=null; try{localStorage.setItem('kad_cid',S.cid)}catch(x){} S.queue=[]; S.b2b=null; subscribeCompany(); };
+
+// ---------- navigation ----------
+const TABS=[['home','Home'],['scan','Scan bills'],['review','Review'],['tally','Post to Tally'],['gst','GST'],['tds','TDS'],['calendar','Calendar'],['company','Company setup'],['log','Activity']];
+function renderNav(){ $('#nav').innerHTML=TABS.map(([k,l])=>{ let n=''; if(k==='review'){const x=S.bills.filter(b=>b.status==='draft').length; if(x) n=` (${x})`;} if(k==='tally'){const x=S.bills.filter(b=>b.status==='approved').length; if(x) n=` (${x})`;} return `<button class="${S.tab===k?'on':''}" data-tab="${k}">${l}${n}</button>`; }).join(''); }
+function setHash(){ try{ history.replaceState(null,'','#'+S.tab); }catch(e){} }
+window.addEventListener('hashchange',()=>{ const h=location.hash.slice(1); if(TABS.some(t=>t[0]===h)){S.tab=h; render();} });
+
+// ---------- render ----------
+function render(){
+  renderNav(); $('#storeMode').textContent = Store.mode==='cloud'?'Online – saved for all devices':'Saved on this device – back up weekly'; $('#storeMode').className='pill '+(Store.mode==='cloud'?'p-ok':'p-warn');
+  const c=co(); const m=$('#main');
+  if(!c && !['company','home'].includes(S.tab)) S.tab='company';
+  const f={home:vHome,scan:vScan,review:vReview,tally:vTally,bank:vBank,accounts:vAccounts,gst:vGST,tds:vTDS,calendar:vCal,company:vCompany,log:vLog}[S.tab];
+  const keep=document.activeElement&&document.activeElement.id; const sel=document.activeElement&&document.activeElement.selectionStart;
+  if(S.editing && m.contains(document.activeElement)) return; // don't clobber typing
+  m.innerHTML=f(c);
+  if(keep){const el=document.getElementById(keep); if(el){el.focus(); try{el.setSelectionRange(sel,sel)}catch(e){}}}
+}
+function statusPill(s){ return {draft:'<span class="pill p-warn">To review</span>',approved:'<span class="pill p-info">Approved</span>',sent:'<span class="pill p-n">Sent to Tally</span>',posted:'<span class="pill p-ok">Posted in Tally</span>',failed:'<span class="pill p-bad">Tally error</span>'}[s]||s; }
+
+function flowSVG(){
+  const n=k=>S.bills.filter(b=>b.status===k).length;
+  const steps=[['📷','Scanned',S.queue.filter(q=>q.state!=='done').length,'scan'],['🔍','To review',n('draft'),'review'],['✅','Approved',n('approved'),'tally'],['📤','Sent to Tally',n('sent'),'tally'],['📒','Posted',n('posted'),'tally']];
+  let x=10, out='';
+  steps.forEach((s,i)=>{ out+=`<g data-tab="${s[3]}" style="cursor:pointer"><rect x="${x}" y="10" width="150" height="78" rx="14" fill="${i===4?'#DDF3E3':'#FFE2C2'}" stroke="${i===4?'#0B6B2E':'#C2560C'}" stroke-width="2.5"/><text x="${x+18}" y="44" font-size="22">${s[0]}</text><text x="${x+52}" y="44" font-size="26" fill="#141414">${s[2]}</text><text x="${x+18}" y="74" font-size="14" fill="#3A2A1A">${s[1]}</text></g>`;
+    if(i<4) out+=`<path d="M${x+152} 49 h22" stroke="#C2560C" stroke-width="3" marker-end="url(#ar)"/>`; x+=180; });
+  return `<svg viewBox="0 0 900 100" width="100%" role="img" aria-label="Bill flow"><defs><marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#C2560C"/></marker></defs>${out}</svg>`;
+}
+function taskStatus(cid,t){ const s=S.allTasks[cid+'|'+t.key]||(cid===S.cid?S.tasks[t.key]:null); return s||null; }
+function dueClass(t,st){ if(st&&st.status==='filed') return 'done'; const days=(new Date(t.dueOverride||t.dueISO)-new Date(isoDate(new Date())))/864e5; if(days<0) return 'late'; if(days<=5) return 'soon'; return ''; }
+function upcoming(cmp,months=2){
+  const out=[]; const d=new Date();
+  for(let i=-1;i<months;i++){ const x=new Date(d.getFullYear(),d.getMonth()+i,1);
+    dueTasks(cmp,x.getFullYear(),x.getMonth()+1).forEach(t=>{ const st=taskStatus(cmp.id,t); if(st&&st.dueOverride) t.dueOverride=st.dueOverride; out.push({...t,cid:cmp.id,st}); }); }
+  return out.filter(t=>t.dueISO>=(cmp.trackFrom||'')).sort((a,b)=>(a.dueOverride||a.dueISO).localeCompare(b.dueOverride||b.dueISO));
+}
+function taskRow(t,cmp){
+  const st=t.st, cls=dueClass(t,st); const dd=new Date(t.dueOverride||t.dueISO);
+  const days=Math.round((dd-new Date(isoDate(new Date())))/864e5);
+  const when= st&&st.status==='filed'?`Filed ${esc(st.filedOn||'')} · Ack ${esc(st.ack||'—')}` : days<0?`<b style="color:var(--bad)">${-days} day(s) overdue</b>`: days===0?'<b>Due today</b>':`Due in ${days} day(s)`;
+  return `<div class="task"><div class="datebox ${cls}"><b>${dd.getDate()}</b><span>${dd.toLocaleString('en-IN',{month:'short'})}</span></div>
+  <div><div><b>${esc(t.title)}</b> ${t.optional?'<span class="pill p-n">optional</span>':''}</div><div class="muted">${esc(cmp.short||cmp.name)} · ${esc(t.period)} · ${when}${st&&st.status==='started'?' · <span class="pill p-info">in progress</span>':''}</div></div>
+  <div class="acts row">${st&&st.status==='filed'?`<button class="small" data-act="reopen" data-cid="${cmp.id}" data-key="${t.key}">Undo</button>`:`<button class="small primary" data-act="file" data-cid="${cmp.id}" data-key="${t.key}">Start filing</button><button class="small" data-act="markFiled" data-cid="${cmp.id}" data-key="${t.key}">Mark filed</button>`}</div></div>`;
+}
+function vHome(c){
+  if(!S.companies.length) return `<div class="card"><h2>Welcome 👋</h2><p>Start by adding your companies. For each one you'll enter the Tally company name, GSTIN, TAN and how often you file GST.</p><button class="primary" data-tab="company">Add first company</button></div>${howItWorks()}`;
+  const all=S.companies.flatMap(cmp=>upcoming(cmp,2).map(t=>({t,cmp}))).filter(x=>!(x.t.st&&x.t.st.status==='filed')).sort((a,b)=>(a.t.dueOverride||a.t.dueISO).localeCompare(b.t.dueOverride||b.t.dueISO)).slice(0,12);
+  const late=all.filter(x=>dueClass(x.t,x.t.st)==='late').length, soon=all.filter(x=>dueClass(x.t,x.t.st)==='soon').length;
+  return `<div class="grid3" style="margin-bottom:14px">
+   <div class="kpi"><b>${S.companies.length}</b><span>Companies</span></div>
+   <div class="kpi" style="${late?'background:var(--badbg);border-color:#E7A49B':''}"><b>${late}</b><span>Filings overdue</span></div>
+   <div class="kpi" style="${soon?'background:var(--warnbg);border-color:#E8C96A':''}"><b>${soon}</b><span>Due in 5 days</span></div>
+   <div class="kpi"><b>${S.bills.filter(b=>b.status==='draft').length}</b><span>Bills to review (${esc(c?.short||'')})</span></div></div>
+  <div class="card"><h3>${esc(c?.short||c?.name||'')} – bill flow</h3><p class="muted">Tap a box to go there.</p>${flowSVG()}</div>
+  <div class="card"><div class="billhead"><h3>Coming up – all companies</h3><button class="small" data-tab="calendar">Full calendar</button></div><div style="margin-top:10px">${all.length?all.map(x=>taskRow(x.t,x.cmp)).join(''):'<p>Nothing pending in the next two months. 🎉</p>'}</div>
+  <p class="muted">Due dates follow the standard GST and Income-tax calendar. If the government extends a date, open the task and change it.</p></div>`;
+}
+function howItWorks(){return `<div class="card"><h3>How it works</h3><ul class="tight"><li><b>Scan bills</b> – photos or PDFs; AI reads them.</li><li><b>Review</b> – app checks GSTIN, GST maths, duplicates and ledger names; you approve.</li><li><b>Post to Tally</b> – app makes the Tally file; the bridge on your Tally PC posts it.</li><li><b>Bank</b> – upload statements; entries are classified (bill payments, TDS/GST challans, charges) and posted to Tally, or reconciled with Tally.</li><li><b>Accounts</b> – quarterly trial balance, P&amp;L and balance sheet from Tally, with quarter-end provisions.</li><li><b>GST & TDS</b> – working figures, 2B matching, due dates.</li><li><b>Filing</b> – the app asks your permission and opens the official portal. You type password and OTP there yourself. The app never asks for or stores them.</li></ul></div>`;}
+
+// ---------- scan ----------
+function vScan(c){
+  const ai=!!Store.ai;
+  return `<div class="card"><h2>Scan bills – ${esc(c.short||c.name)}</h2>
+  ${ai?'':`<div class="banner" style="background:var(--warnbg);color:var(--warn)">Bill reading needs the online app on claude.ai. You can still type a bill in by hand.</div>`}
+  <div class="drop" id="drop" data-act="pick"><div style="font-size:34px">📷 📄</div><b>Tap to choose bill photos or PDFs</b><div class="muted">or drop files here · several at once is fine · clear, flat, full-page photos read best</div></div>
+  <div class="row" style="margin-top:10px"><button data-act="manual">Type a bill by hand</button><span class="muted">Bills are read one by one. Images are not stored – only the details you approve.</span></div></div>
+  ${S.queue.length?`<div class="card"><h3>Reading</h3><table><tr><th>File</th><th>Status</th></tr>${S.queue.map(q=>`<tr><td>${esc(q.name)}</td><td>${q.state==='done'?'<span class="pill p-ok">Read – sent to Review</span>':q.state==='err'?`<span class="pill p-bad">${esc(q.err)}</span>`:q.state==='busy'?`<span class="pill p-info">Reading… ${esc(q.note||'')}</span>`:'<span class="pill p-n">Waiting</span>'}</td></tr>`).join('')}</table>${S.queue.some(q=>q.state==='done')?'<p><button class="primary" data-tab="review">Go to Review</button></p>':''}</div>`:''}`;
+}
+async function fileToImages(file){
+  const imgs=[];
+  const toJpeg=async(src,w,h)=>{ const scale=Math.min(1,1800/Math.max(w,h)); const cv=document.createElement('canvas'); cv.width=Math.round(w*scale); cv.height=Math.round(h*scale); cv.getContext('2d').drawImage(src,0,0,cv.width,cv.height); return await new Promise(r=>cv.toBlob(r,'image/jpeg',0.85)); };
+  if(file.type==='application/pdf'||/\.pdf$/i.test(file.name)){
+    if(!window.pdfjsLib) throw new Error('PDF reader did not load');
+    const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;
+    for(let p=1;p<=Math.min(pdf.numPages,3);p++){ const pg=await pdf.getPage(p); const vp=pg.getViewport({scale:2}); const cv=document.createElement('canvas'); cv.width=vp.width; cv.height=vp.height; await pg.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise; imgs.push(await toJpeg(cv,cv.width,cv.height)); }
+  } else {
+    const bmp=await createImageBitmap(file); imgs.push(await toJpeg(bmp,bmp.width,bmp.height));
+  }
+  return imgs;
+}
+const PROMPT=c=>`You read Indian purchase/expense bills (tax invoices) for accounting. The buyer is "${c.name}" (GSTIN ${c.gstin||'n/a'}).
+Read the attached bill image(s) – one bill, possibly several pages. Reply with ONLY a JSON object, no other text:
+{"supplierName":"","supplierGSTIN":"","invoiceNo":"","invoiceDate":"YYYY-MM-DD","buyerGSTIN":"","placeOfSupply":"",
+ "lines":[{"description":"short summary","hsn":"","rate":18,"taxable":0,"cgst":0,"sgst":0,"igst":0,"cess":0}],
+ "roundOff":0,"total":0,"isService":false,"tdsHint":"none|contract|professional|rent|commission|purchase|other","confidence":"high|medium|low","notes":"anything unclear"}
+Rules: group items by GST rate – one line per rate with summed taxable value and tax. Amounts are numbers in rupees, no commas. Dates in Indian bills are day-month-year. If a value is not on the bill use "" or 0 and say so in notes. Never guess a GSTIN – copy it exactly or leave it blank.`;
+async function readQueue(){
+  const c=co(); if(!c) return;
+  for(const q of S.queue){ if(q.state!=='wait') continue;
+    q.state='busy'; q.note='preparing'; render();
+    try{
+      const imgs=await fileToImages(q.file); q.note='AI reading'; render();
+      if(!Store.ai) throw new Error('AI reading not available here'); if(!Store.aiImages) throw new Error('Image reading not enabled here');
+      const res=await Store.ai(PROMPT(c),{images:imgs,modelTier:'default'});
+      const t=res.text||''; const j=JSON.parse(t.slice(t.indexOf('{'),t.lastIndexOf('}')+1));
+      await addBillFromAI(j,q.name); q.state='done';
+    }catch(e){ q.state='err'; q.err=e.code==='rate_limited'?'Busy – try again in a minute':e.code==='not_granted'?'Permission not given':(e.message||'Could not read').slice(0,80); if(e.code==='rate_limited'){render(); break;} }
+    render();
+  }
+}
+function guessLedger(c,rate,isService){
+  const m=rateMap(c,rate); if(m.purchase) return m.purchase;
+  return isService?(c.defaultExpense||''):(c.defaultPurchase||'');
+}
+function findLedger(name){ const n=norm(name); if(!n) return ''; const exact=S.ledgers.find(l=>norm(l)===n); if(exact) return exact; const part=S.ledgers.find(l=>norm(l).includes(n.slice(0,10))||n.includes(norm(l))&&norm(l).length>5); return part||''; }
+async function addBillFromAI(j,src){
+  const c=co(); const id=uid();
+  const tdsMap=(c.tdsMap||{})[j.tdsHint]||null;
+  const b={cid:c.id,status:'draft',createdAt:new Date().toISOString(),source:src,supplierName:String(j.supplierName||'').trim(),supplierGSTIN:String(j.supplierGSTIN||'').toUpperCase().replace(/\s/g,''),invoiceNo:String(j.invoiceNo||'').trim(),invoiceDate:j.invoiceDate||'',
+    lines:(j.lines||[]).map(l=>({description:l.description||'',hsn:l.hsn||'',rate:+l.rate||0,taxable:r2(l.taxable),cgst:r2(l.cgst),sgst:r2(l.sgst),igst:r2(l.igst),cess:r2(l.cess),ledger:guessLedger(c,+l.rate||0,j.isService)})),
+    roundOff:r2(j.roundOff),total:r2(j.total),aiNotes:[j.confidence?`AI confidence: ${j.confidence}`:'',j.notes||''].filter(Boolean).join(' · '),
+    voucherType:j.isService&&tdsMap?(c.journalVchType||'Journal'):(c.purchaseVchType||'Purchase'),
+    tds:{on:!!(tdsMap&&j.tdsHint&&j.tdsHint!=='none'),section:tdsMap?.section||'',rate:tdsMap?.rate||'',ledger:tdsMap?.ledger||'',base:0}};
+  if(!b.lines.length) b.lines=[{description:'',hsn:'',rate:18,taxable:0,cgst:0,sgst:0,igst:0,cess:0,ledger:''}];
+  b.partyLedger=findLedger(b.supplierName)||b.supplierName;
+  if(j.buyerGSTIN && c.gstin && String(j.buyerGSTIN).toUpperCase()!==c.gstin.toUpperCase()) b.aiNotes+=` · ⚠ Bill is addressed to GSTIN ${j.buyerGSTIN}, not ${c.gstin}`;
+  await Store.set('bills',id,b); await logIt(`Bill read: ${b.supplierName} #${b.invoiceNo}`);
+}
+
+// ---------- review ----------
+function vReview(c){
+  const list=S.bills.filter(b=>['draft','failed'].includes(b.status));
+  if(!list.length) return `<div class="card"><h2>Review</h2><p>No bills waiting. <a href="#scan" data-tab="scan">Scan some bills</a>.</p></div>`;
+  const ledOpts=`<datalist id="ledList">${S.ledgers.slice(0,4000).map(l=>`<option value="${esc(l)}">`).join('')}</datalist>`;
+  return ledOpts+`<div class="card"><h2>Review – ${list.length} bill(s)</h2><p class="muted">Check each bill against the scan, fix anything red, then approve. Nothing goes to Tally until you approve it.</p></div>`+list.map(b=>billCard(b,c)).join('');
+}
+function billCard(b,c){
+  const ch=billChecks(b,c,S.ledgerSet,S.bills); const calc=billCalc(b); const v=voucherEntries(b,c);
+  const bad=ch.filter(x=>x.lvl==='bad').length; const f=(k,lbl,w='')=>`<label class="f">${lbl}<input id="${b.id}_${k}" data-bill="${b.id}" data-k="${k}" value="${esc(b[k]??'')}" ${w}></label>`;
+  return `<div class="card" id="card_${b.id}"><div class="billhead"><div><h3>${esc(b.supplierName||'(no supplier)')} · #${esc(b.invoiceNo||'?')}</h3><div class="muted">${esc(b.source||'')} ${statusPill(b.status)} ${b.tallyError?`· ${esc(b.tallyError)}`:''}</div></div><div class="row"><b>Total ₹${fmt(calc.total)}</b></div></div>
+  ${b.aiNotes?`<div class="chk info">${esc(b.aiNotes)}</div>`:''}
+  <div class="grid3" style="margin-top:8px">${f('supplierName','Supplier name (as on bill)')}${f('partyLedger','Party ledger in Tally','list="ledList"')}${f('supplierGSTIN','Supplier GSTIN')}${f('invoiceNo','Invoice no.')}${f('invoiceDate','Invoice date','type="date"')}${f('postDate','Posting date (blank = invoice date)','type="date"')}
+  <label class="f">Voucher type<select data-bill="${b.id}" data-k="voucherType">${[c.purchaseVchType||'Purchase',c.journalVchType||'Journal'].map(x=>`<option ${x===b.voucherType?'selected':''}>${esc(x)}</option>`).join('')}</select></label>${f('roundOff','Round off ₹','inputmode="decimal"')}${f('total','Bill total ₹','inputmode="decimal"')}</div>
+  <div class="tw lines" style="margin-top:10px"><table><tr><th>Item / description</th><th>HSN</th><th class="n">GST %</th><th class="n">Taxable</th><th class="n">CGST</th><th class="n">SGST</th><th class="n">IGST</th><th>Ledger (Dr)</th><th></th></tr>
+  ${(b.lines||[]).map((l,i)=>`<tr>${['description','hsn','rate','taxable','cgst','sgst','igst'].map(k=>`<td><input id="${b.id}_l${i}_${k}" data-bill="${b.id}" data-line="${i}" data-k="${k}" value="${esc(l[k]??'')}" ${k==='description'?'':'inputmode="decimal" style="max-width:100px"'}></td>`).join('')}<td><input id="${b.id}_l${i}_ledger" list="ledList" data-bill="${b.id}" data-line="${i}" data-k="ledger" value="${esc(l.ledger||'')}" style="min-width:170px"></td><td><button class="small" data-act="delLine" data-bill="${b.id}" data-line="${i}" title="Remove line">✕</button></td></tr>`).join('')}
+  <tr><td colspan="3"><button class="small" data-act="addLine" data-bill="${b.id}">+ Add GST-rate line</button></td><td class="n"><b>${fmt(calc.taxable)}</b></td><td class="n"><b>${fmt(calc.cgst)}</b></td><td class="n"><b>${fmt(calc.sgst)}</b></td><td class="n"><b>${fmt(calc.igst)}</b></td><td colspan="2"></td></tr></table></div>
+  <div class="row" style="margin-top:10px;gap:14px"><label class="row" style="gap:6px"><input type="checkbox" data-bill="${b.id}" data-k="tds.on" ${b.tds?.on?'checked':''}> <b>Deduct TDS</b></label>
+  ${b.tds?.on?`<label class="f">Section / nature<input id="${b.id}_tsec" data-bill="${b.id}" data-k="tds.section" value="${esc(b.tds.section||'')}" list="secList" style="width:170px"></label><label class="f">Rate %<input id="${b.id}_trate" data-bill="${b.id}" data-k="tds.rate" value="${esc(b.tds.rate||'')}" inputmode="decimal" style="width:80px"></label><label class="f">On amount (blank = taxable)<input id="${b.id}_tbase" data-bill="${b.id}" data-k="tds.base" value="${esc(b.tds.base||'')}" inputmode="decimal" style="width:130px"></label><label class="f">TDS ledger<input id="${b.id}_tled" data-bill="${b.id}" data-k="tds.ledger" value="${esc(b.tds.ledger||'')}" list="ledList" style="width:200px"></label><b>TDS ₹${fmt(calc.tds)}</b>`:''}</div>
+  <datalist id="secList">${Object.values(c.tdsMap||{}).map(t=>`<option value="${esc(t.section)}">`).join('')}</datalist>
+  <div class="grid2" style="margin-top:10px"><div><b>Checks</b>${ch.map(x=>`<div class="chk ${x.lvl}">${x.lvl==='ok'?'✔':x.lvl==='bad'?'✖':x.lvl==='warn'?'⚠':'ℹ'} ${esc(x.msg)}</div>`).join('')}</div>
+  <div><b>Tally entry preview</b><table class="vch"><tr><th>Ledger</th><th class="n">Dr</th><th class="n">Cr</th></tr>${v.entries.map(e=>`<tr><td>${esc(e.ledger||'—')}</td><td class="n">${e.dr?fmt(e.dr):''}</td><td class="n">${e.cr?fmt(e.cr):''}</td></tr>`).join('')}<tr><th>Total</th><th class="n">${fmt(v.dr)}</th><th class="n">${fmt(v.cr)}</th></tr></table>${v.balanced?'<div class="chk ok">✔ Debit = Credit</div>':'<div class="chk bad">✖ Entry does not balance</div>'}</div></div>
+  <div class="row" style="margin-top:12px"><button class="primary" data-act="approve" data-bill="${b.id}" ${bad||!v.balanced?'disabled':''}>Approve for Tally</button>${bad?`<span class="muted">Fix ${bad} red item(s) first</span>`:''}<div class="grow"></div><button class="danger small" data-act="delBill" data-bill="${b.id}">Delete bill</button></div></div>`;
+}
+const saveTimers={};
+function onBillInput(el){
+  const b=S.bills.find(x=>x.id===el.dataset.bill); if(!b) return; const k=el.dataset.k;
+  let val=el.type==='checkbox'?el.checked:el.value;
+  const num=['rate','taxable','cgst','sgst','igst','cess','roundOff','total','tds.rate','tds.base'].includes(k);
+  if(num && val!=='' ) val=+String(val).replace(/,/g,'')||0;
+  if(el.dataset.line!==undefined){ b.lines[+el.dataset.line][k]=val; }
+  else if(k.startsWith('tds.')){ b.tds=b.tds||{}; b.tds[k.slice(4)]=val; if(k==='tds.section'){ const m=Object.values(c_tds()).find(t=>t.section===val); if(m){b.tds.rate=b.tds.rate||m.rate; b.tds.ledger=b.tds.ledger||m.ledger;} } }
+  else b[k]=k==='supplierGSTIN'?String(val).toUpperCase():val;
+  S.editing=b.id; clearTimeout(saveTimers[b.id]);
+  saveTimers[b.id]=setTimeout(async()=>{ S.editing=null; const {id,...rest}=b; await Store.set('bills',b.id,rest); if(Store.mode!=='cloud') render(); else rerenderCard(b); },700);
+  if(el.type==='checkbox'||el.tagName==='SELECT'){ S.editing=null; rerenderCard(b); }
+}
+function c_tds(){return co().tdsMap||{};}
+function rerenderCard(b){ const el=document.getElementById('card_'+b.id); if(!el) return; const a=document.activeElement?.id; const tmp=document.createElement('div'); tmp.innerHTML=billCard(b,co()); el.replaceWith(tmp.firstElementChild); if(a){const x=document.getElementById(a); if(x){x.focus(); try{const L=x.value.length; x.setSelectionRange(L,L);}catch(e){}}} }
+
+// ---------- tally ----------
+function vTally(c){
+  const ap=S.bills.filter(b=>b.status==='approved'), sent=S.bills.filter(b=>b.status==='sent'), posted=S.bills.filter(b=>b.status==='posted').slice(0,30);
+  return `<div class="card"><h2>Post to Tally – ${esc(c.short||c.name)}</h2>
+  <svg viewBox="0 0 860 90" width="100%" role="img" aria-label="How posting works"><defs><marker id="ar2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#C2560C"/></marker></defs>
+  ${[['This app','makes Tally file'],['Downloads folder','tally_….txt'],['Tally bridge','on Tally PC'],['TallyPrime','port '+(c.tallyPort||9000)]].map((s,i)=>`<rect x="${10+i*215}" y="10" width="180" height="66" rx="12" fill="${i===3?'#DDF3E3':'#FFE2C2'}" stroke="#C2560C" stroke-width="2.5"/><text x="${24+i*215}" y="38" font-size="16" fill="#141414">${s[0]}</text><text x="${24+i*215}" y="62" font-size="13" fill="#3A2A1A">${s[1]}</text>${i<3?`<path d="M${192+i*215} 43 h28" stroke="#C2560C" stroke-width="3" marker-end="url(#ar2)"/>`:''}`).join('')}</svg>
+  <ul class="tight muted"><li>Tally company used: <b>${esc(c.tallyName||c.name)}</b> – must be open in Tally on that PC.</li><li>No bridge? Rename the file to <b>.xml</b>. In TallyPrime use <b>Import → Masters</b> (new parties), then <b>Import → Transactions</b> with the same file.</li><li>Try this on a test copy of the company first.</li></ul></div>
+  <div class="card"><div class="billhead"><h3>Approved – ready to send (${ap.length})</h3><div class="row"><label class="row" style="gap:6px"><input type="checkbox" id="mkParties" checked> Create missing party ledgers</label><button class="primary" data-act="export" ${ap.length?'':'disabled'}>Make Tally file &amp; send</button></div></div>
+  ${ap.length?billTable(ap,true):'<p class="muted">Nothing approved yet.</p>'}</div>
+  <div class="card"><h3>Sent – waiting for Tally confirmation (${sent.length})</h3><p class="muted">Check the bridge window, or the <b>tally_results</b> folder, then confirm here.</p>${sent.length?billTable(sent,false,true):'<p class="muted">None.</p>'}</div>
+  <div class="card"><h3>Posted (latest 30)</h3>${posted.length?billTable(posted):'<p class="muted">None yet.</p>'}</div>`;
+}
+function billTable(list,unapprove,confirm){
+  return `<div class="tw"><table><tr><th>Date</th><th>Supplier</th><th>Invoice</th><th class="n">Taxable</th><th class="n">GST</th><th class="n">TDS</th><th class="n">Total</th><th></th></tr>${list.map(b=>{const c=billCalc(b); return `<tr><td>${esc(b.invoiceDate)}</td><td>${esc(b.supplierName)}</td><td>${esc(b.invoiceNo)}</td><td class="n">${fmt(c.taxable)}</td><td class="n">${fmt(c.cgst+c.sgst+c.igst)}</td><td class="n">${c.tds?fmt(c.tds):''}</td><td class="n">${fmt(c.total)}</td><td class="row" style="gap:4px">${unapprove?`<button class="small" data-act="unapprove" data-bill="${b.id}">Back to review</button>`:''}${confirm?`<button class="small primary" data-act="posted" data-bill="${b.id}">Posted ✔</button><button class="small danger" data-act="tallyFail" data-bill="${b.id}">Error</button>`:''}</td></tr>`;}).join('')}</table></div>`;
+}
+async function doExport(){
+  const c=co(); const ap=S.bills.filter(b=>b.status==='approved'); if(!ap.length) return;
+  const xml=tallyXML(ap,c,S.ledgerSet,{createParties:$('#mkParties')?.checked!==false});
+  const stamp=new Date().toISOString().replace(/[-:T]/g,'').slice(0,14);
+  const fn=`tally_${(c.code||c.short||'CO').replace(/[^A-Za-z0-9]/g,'')}_${stamp}.txt`;
+  const res=await saveFile(fn,xml,'Tally import file');
+  if(res!=='declined'){ for(const b of ap){ const {id,...rest}=b; await Store.set('bills',b.id,{...rest,status:'sent',sentFile:fn,sentAt:new Date().toISOString()}); } await logIt(`Tally file ${fn}: ${ap.length} voucher(s)`); }
+}
+
+// ---------- GST ----------
+function monthPicker(){ return `<label class="row" style="gap:6px"><span class="muted">Month</span><input type="month" id="monthSel" value="${S.month}"></label>`; }
+function periodBills(c,ym){ return S.bills.filter(b=>['approved','sent','posted'].includes(b.status)&&String(b.invoiceDate||'').startsWith(ym)); }
+function vGST(c){
+  if(!c.gstin) return `<div class="card"><h2>GST</h2><p>Add the GSTIN in Company setup to use this tab.</p></div>`;
+  const pb=periodBills(c,S.month); const by={};
+  pb.forEach(b=>(b.lines||[]).forEach(l=>{ const k=+l.rate||0; const o=by[k]=by[k]||{tx:0,c:0,s:0,i:0,n:0}; o.tx+=+l.taxable||0; o.c+=+l.cgst||0; o.s+=+l.sgst||0; o.i+=+l.igst||0; }));
+  const rates=Object.keys(by).sort((a,b)=>a-b); const tot=rates.reduce((o,k)=>({tx:o.tx+by[k].tx,c:o.c+by[k].c,s:o.s+by[k].s,i:o.i+by[k].i}),{tx:0,c:0,s:0,i:0});
+  const maxT=Math.max(1,...rates.map(k=>by[k].c+by[k].s+by[k].i));
+  const bars=rates.map((k,i)=>{const v=by[k].c+by[k].s+by[k].i; const w=Math.round(520*v/maxT); return `<text x="0" y="${22+i*30}" font-size="14" fill="#141414">${k}%</text><rect x="50" y="${8+i*30}" width="${Math.max(2,w)}" height="20" rx="5" fill="#FFB86E" stroke="#C2560C"/><text x="${58+w}" y="${23+i*30}" font-size="13" fill="#141414">₹${fmt(v)}</text>`;}).join('');
+  const [y,m]=S.month.split('-').map(Number); const nx=m===12?[y+1,1]:[y,m+1];
+  const tasks=dueTasks(c,nx[0],nx[1]).filter(t=>t.kind==='gst').map(t=>({...t,st:S.tasks[t.key]||null}));
+  let mt='';
+  if(S.b2b){ const r=match2B(pb,S.b2b);
+    mt=`<div class="grid3" style="margin:8px 0"><div class="kpi" style="background:var(--okbg)"><b>${r.matched.length}</b><span>Matched with 2B</span></div><div class="kpi" style="background:var(--badbg)"><b>${r.onlyBooks.length}</b><span>In books, not in 2B (ITC at risk)</span></div><div class="kpi" style="background:var(--warnbg)"><b>${r.only2b.length}</b><span>In 2B, not in books</span></div></div>
+    ${r.onlyBooks.length?`<h3>In books, not in 2B – follow up with supplier</h3>${miniTable(r.onlyBooks.map(b=>[b.supplierName,b.supplierGSTIN,b.invoiceNo,b.invoiceDate,fmt((c=>c.cgst+c.sgst+c.igst)(billCalc(b)))]),['Supplier','GSTIN','Invoice','Date','GST'])}`:''}
+    ${r.only2b.length?`<h3 style="margin-top:10px">In 2B, not in books – missing bill?</h3>${miniTable(r.only2b.map(x=>[x.name,x.gstin,x.inv,x.dt,fmt(x.tax)]),['Supplier','GSTIN','Invoice','Date','GST'])}`:''}
+    ${r.matched.filter(x=>Math.abs(x.diff)>1).length?`<h3 style="margin-top:10px">Amount differences</h3>${miniTable(r.matched.filter(x=>Math.abs(x.diff)>1).map(x=>[x.b.supplierName,x.b.invoiceNo,fmt(x.diff)]),['Supplier','Invoice','Books − 2B GST'])}`:''}`;
+  }
+  return `<div class="card"><div class="billhead"><h2>GST – ${esc(c.short||c.name)}</h2>${monthPicker()}</div><p class="muted">${esc(c.gstin)} · ${c.gstFreq==='qrmp'?'Quarterly (QRMP)':'Monthly'} filer · purchases from bills approved in this app</p></div>
+  <div class="card"><h3>Input tax credit from bills – ${S.month}</h3>${rates.length?`<svg viewBox="0 0 760 ${rates.length*30+10}" width="100%">${bars}</svg>
+   <div class="tw"><table><tr><th>GST rate</th><th class="n">Taxable</th><th class="n">CGST</th><th class="n">SGST</th><th class="n">IGST</th></tr>${rates.map(k=>`<tr><td>${k}%</td><td class="n">${fmt(by[k].tx)}</td><td class="n">${fmt(by[k].c)}</td><td class="n">${fmt(by[k].s)}</td><td class="n">${fmt(by[k].i)}</td></tr>`).join('')}<tr><th>Total (${pb.length} bills)</th><th class="n">${fmt(tot.tx)}</th><th class="n">${fmt(tot.c)}</th><th class="n">${fmt(tot.s)}</th><th class="n">${fmt(tot.i)}</th></tr></table></div>
+   <div class="row" style="margin-top:8px"><button data-act="gstCsv">Download purchase register (CSV)</button></div>`:'<p class="muted">No approved bills dated in this month.</p>'}
+   <p class="muted">Sales (outward) figures come from Tally's own GSTR-1 report – export from Tally for GSTR-1.</p></div>
+  <div class="card"><h3>GSTR-2B match <span class="pill p-n">beta</span></h3><p class="muted">Download GSTR-2B JSON from the GST portal for ${S.month} and load it here. Matching is by supplier GSTIN + invoice no.</p><button data-act="load2b">Load GSTR-2B JSON</button>${mt}</div>
+  <div class="card"><h3>Returns for ${S.month} (due next month)</h3>${tasks.length?tasks.map(t=>taskRow(t,c)).join(''):'<p class="muted">None.</p>'}</div>`;
+}
+function miniTable(rows,heads){ return `<div class="tw"><table><tr>${heads.map(h=>`<th>${esc(h)}</th>`).join('')}</tr>${rows.map(r=>`<tr>${r.map(x=>`<td>${esc(x)}</td>`).join('')}</tr>`).join('')}</table></div>`; }
+const csv=rows=>rows.map(r=>r.map(x=>{x=String(x??''); return /[",\n]/.test(x)?'"'+x.replace(/"/g,'""')+'"':x;}).join(',')).join('\n');
+
+// ---------- TDS ----------
+function vTDS(c){
+  if(!c.tan) return `<div class="card"><h2>TDS</h2><p>Add the TAN in Company setup to use this tab.</p></div>`;
+  const pb=periodBills(c,S.month).filter(b=>b.tds&&b.tds.on);
+  const bySec={}; pb.forEach(b=>{const k=b.tds.section||'(no section)'; const t=billCalc(b).tds; const o=bySec[k]=bySec[k]||{n:0,base:0,tds:0}; o.n++; o.base+=+b.tds.base||billCalc(b).taxable; o.tds+=t;});
+  const tot=Object.values(bySec).reduce((s,o)=>s+o.tds,0);
+  const [y,m]=S.month.split('-').map(Number); const nx=m===12?[y+1,1]:[y,m+1];
+  const tasks=[...dueTasks(c,nx[0],nx[1]),...dueTasks(c,y,m)].filter(t=>t.kind==='tds').map(t=>({...t,st:S.tasks[t.key]||null}));
+  const uniq=[...new Map(tasks.map(t=>[t.key,t])).values()];
+  return `<div class="card"><div class="billhead"><h2>TDS – ${esc(c.short||c.name)}</h2>${monthPicker()}</div><p class="muted">TAN ${esc(c.tan)} · from bills approved in this app. Salary TDS is not covered here – take it from payroll.</p></div>
+  <div class="card"><h3>TDS deducted – ${S.month}</h3>${pb.length?`<div class="grid3" style="margin-bottom:10px">${Object.entries(bySec).map(([k,o])=>`<div class="kpi"><b>₹${fmt(o.tds)}</b><span>${esc(k)} · ${o.n} bill(s)</span></div>`).join('')}<div class="kpi" style="background:var(--accent2)"><b>₹${fmt(tot)}</b><span>Challan total to deposit</span></div></div>
+   ${miniTable(pb.map(b=>{const k=billCalc(b); return [b.invoiceDate,b.supplierName,b.supplierGSTIN?b.supplierGSTIN.slice(2,12):'(PAN?)',b.tds.section,fmt(+b.tds.base||k.taxable),b.tds.rate+'%',fmt(k.tds)];}),['Date','Party','PAN (from GSTIN)','Section','Amount paid/credited','Rate','TDS'])}
+   <p class="muted">PAN is taken from characters 3–12 of the GSTIN. For parties without GSTIN, get the PAN separately.</p><div class="row"><button data-act="tdsCsv">Download TDS register (CSV)</button><button data-act="tdsQCsv">Download quarter register (CSV)</button></div>`:'<p class="muted">No bills with TDS this month.</p>'}</div>
+  <div class="card"><h3>TDS deposit &amp; returns</h3>${uniq.map(t=>taskRow(t,c)).join('')||'<p class="muted">None this period.</p>'}<p class="muted">From 1 April 2026 the Income-tax Act, 2025 applies: quarterly returns are on Form 140 (non-salary) and Form 138 (salary) with new section references. Returns for periods before April 2026 stay on 26Q/24Q.</p></div>`;
+}
+
+// ---------- calendar ----------
+function vCal(){
+  const [y,m]=S.month.split('-').map(Number);
+  const rows=S.companies.flatMap(cmp=>dueTasks(cmp,y,m).filter(t=>t.dueISO>=(cmp.trackFrom||'')).map(t=>{ const st=taskStatus(cmp.id,t); if(st&&st.dueOverride) t.dueOverride=st.dueOverride; return {t:{...t,st},cmp}; })).sort((a,b)=>(a.t.dueOverride||a.t.dueISO).localeCompare(b.t.dueOverride||b.t.dueISO));
+  const days=new Date(y,m,0).getDate(); const first=new Date(y,m-1,1).getDay();
+  let cells=''; for(let i=0;i<first;i++) cells+='<div></div>';
+  for(let d=1;d<=days;d++){ const iso=`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`; const here=rows.filter(r=>(r.t.dueOverride||r.t.dueISO)===iso); const allDone=here.length&&here.every(r=>r.t.st&&r.t.st.status==='filed');
+    cells+=`<div style="min-height:54px;border:2px solid var(--line);border-radius:8px;padding:3px 5px;background:${here.length?(allDone?'var(--okbg)':'var(--accent2)'):'#FFFDF9'}"><b>${d}</b>${here.length?`<div style="font-size:11px">${here.map(r=>esc((r.cmp.short||'').slice(0,6)+' '+r.t.title.split(' ')[0])).join('<br>')}</div>`:''}</div>`; }
+  return `<div class="card"><div class="billhead"><h2>Compliance calendar</h2>${monthPicker()}</div><p class="muted">All companies. Orange = something due, green = all filed.</p>
+  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px">${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(x=>`<div class="muted" style="text-align:center">${x}</div>`).join('')}${cells}</div></div>
+  <div class="card"><h3>Due in ${S.month}</h3>${rows.length?rows.map(r=>taskRow(r.t,r.cmp)).join(''):'<p class="muted">Nothing due.</p>'}</div>`;
+}
+
+// ---------- company setup ----------
+function blankCo(){ return {name:'',short:'',code:'',tallyName:'',gstin:'',tan:'',gstFreq:'monthly',qrmpDay:'',purchaseVchType:'Purchase',journalVchType:'Journal',creditorGroup:'Sundry Creditors',cgstLedger:'Input CGST',sgstLedger:'Input SGST',igstLedger:'Input IGST',cessLedger:'Input Cess',roundOffLedger:'Round Off',defaultPurchase:'',defaultExpense:'',tallyPort:9000,rateLedgers:{},tdsMap:{contract:{section:'194C – contractor',rate:2,ledger:'TDS Payable – Contractors'},professional:{section:'194J – professional/technical',rate:10,ledger:'TDS Payable – Professional'},rent:{section:'194I – rent',rate:10,ledger:'TDS Payable – Rent'},commission:{section:'194H – commission',rate:2,ledger:'TDS Payable – Commission'},purchase:{section:'194Q – purchase of goods',rate:0.1,ledger:'TDS Payable – Purchase of goods'}}}; }
+S.coDraft=null;
+function vCompany(c){
+  const d=S.coDraft||(c?JSON.parse(JSON.stringify(c)):blankCo()); S.coDraft=d;
+  const fi=(k,l,extra='')=>`<label class="f">${l}<input data-co="${k}" id="co_${k.replace(/\./g,'_')}" value="${esc(k.split('.').reduce((o,x)=>o?.[x],d)??'')}" ${extra}></label>`;
+  const st=stateOf(d.gstin);
+  return `<div class="card"><div class="billhead"><h2>${d.id?'Company setup – '+esc(d.short||d.name):'Add a company'}</h2><div class="row">${S.companies.length&&d.id?'<button data-act="newCo">+ Add another company</button>':''}</div></div>
+  <div class="grid3" style="margin-top:10px">${fi('name','Company name')}${fi('short','Short name (shown in menus)')}${fi('code','Code for file names (e.g. EIL)')}${fi('tallyName','Company name exactly as in Tally')}${fi('gstin','GSTIN')}${fi('tan','TAN (leave blank if no TDS)')}<label class="f">Track filings due from<input type="date" data-co="trackFrom" id="co_trackFrom" value="${esc(d.trackFrom||isoDate(new Date()).slice(0,8)+'01')}"></label>
+  <label class="f">GST filing<select data-co="gstFreq"><option value="monthly" ${d.gstFreq!=='qrmp'?'selected':''}>Monthly (GSTR-1 11th, 3B 20th)</option><option value="qrmp" ${d.gstFreq==='qrmp'?'selected':''}>Quarterly – QRMP</option></select></label>
+  ${d.gstFreq==='qrmp'?`<label class="f">QRMP GSTR-3B day<select data-co="qrmpDay"><option value="">Auto from state (${st?(QRMP_GROUP1.includes(st)?'22nd':'24th'):'?'})</option><option value="22" ${d.qrmpDay==22?'selected':''}>22nd</option><option value="24" ${d.qrmpDay==24?'selected':''}>24th</option></select></label>`:''}
+  </div>${d.gstin?`<p class="muted">${gstinValid(d.gstin)?`✔ GSTIN valid · ${esc(STATES[st]||'')}`:'✖ GSTIN check digit fails – please re-check'}</p>`:''}
+  <hr class="sep"><h3>Tally ledgers &amp; voucher types</h3><p class="muted">Use the exact names from Tally. Tip: load the ledger list first so names can be picked from a list.</p>
+  <div class="grid3" style="margin-top:8px">${fi('purchaseVchType','Purchase voucher type')}${fi('journalVchType','Journal voucher type')}${fi('creditorGroup','Group for new parties')}${fi('cgstLedger','Input CGST ledger','list="ledList2"')}${fi('sgstLedger','Input SGST ledger','list="ledList2"')}${fi('igstLedger','Input IGST ledger','list="ledList2"')}${fi('cessLedger','Input Cess ledger','list="ledList2"')}${fi('roundOffLedger','Round-off ledger','list="ledList2"')}${fi('defaultPurchase','Default purchase ledger','list="ledList2"')}${fi('defaultExpense','Default expense ledger (services)','list="ledList2"')}${fi('tallyPort','Tally port (bridge setting)','inputmode="numeric"')}</div>
+  <details style="margin-top:10px"><summary><b>Ledgers by GST rate (optional – if you keep separate ledgers per rate)</b></summary><div class="tw"><table><tr><th>Rate</th><th>Purchase ledger</th><th>CGST</th><th>SGST</th><th>IGST</th></tr>${GST_RATES.map(r=>`<tr><td>${r}%</td>${['purchase','cgst','sgst','igst'].map(k=>`<td><input data-co="rateLedgers.${r}.${k}" id="co_r${r}_${k}" value="${esc(d.rateLedgers?.[r]?.[k]||'')}" list="ledList2" style="min-width:140px"></td>`).join('')}</tr>`).join('')}</table></div></details>
+  <details style="margin-top:10px"><summary><b>Bank entry ledgers &amp; voucher types</b></summary><div class="grid3" style="margin-top:8px">${fi('paymentVchType','Payment voucher type')}${fi('receiptVchType','Receipt voucher type')}${fi('contraVchType','Contra voucher type')}${fi('bankChargesLedger','Bank charges ledger','list="ledList2" placeholder="Bank Charges"')}${fi('interestRecdLedger','Interest received ledger','list="ledList2" placeholder="Interest Received"')}${fi('interestPaidLedger','Interest paid ledger','list="ledList2" placeholder="Interest Paid"')}${fi('tdsChallanLedger','TDS challan payment – Dr ledger','list="ledList2" placeholder="TDS Payable"')}${fi('gstCashLedger','GST payment – Dr ledger','list="ledList2" placeholder="Electronic Cash Ledger (GST)"')}${fi('advTaxLedger','Advance tax ledger','list="ledList2" placeholder="Advance Tax"')}${fi('salaryLedger','Salary payment – Dr ledger','list="ledList2" placeholder="Salary Payable"')}</div></details>
+  <details style="margin-top:10px" open><summary><b>TDS defaults (used when AI spots a TDS-type bill)</b></summary><p class="muted">Section names under the Income-tax Act, 2025 differ from the old ones – type the section/nature code your auditor uses.</p><div class="tw"><table><tr><th>Bill type</th><th>Section / nature</th><th>Rate %</th><th>TDS ledger</th></tr>${Object.keys(d.tdsMap||{}).map(k=>`<tr><td>${esc(k)}</td><td><input data-co="tdsMap.${k}.section" id="co_t${k}_s" value="${esc(d.tdsMap[k].section)}"></td><td><input data-co="tdsMap.${k}.rate" id="co_t${k}_r" value="${esc(d.tdsMap[k].rate)}" style="width:80px"></td><td><input data-co="tdsMap.${k}.ledger" id="co_t${k}_l" value="${esc(d.tdsMap[k].ledger)}" list="ledList2"></td></tr>`).join('')}</table></div></details>
+  <datalist id="ledList2">${S.ledgers.slice(0,4000).map(l=>`<option value="${esc(l)}">`).join('')}</datalist>
+  <div class="row" style="margin-top:14px"><button class="primary" data-act="saveCo">Save company</button>${d.id?'<button data-act="cancelCo">Undo changes</button><div class="grow"></div><button class="danger small" data-act="delCo">Delete company</button>':''}</div></div>
+  ${d.id?`<div class="card"><h3>Tally ledger list – ${S.ledgers.length} ledgers loaded</h3><ul class="tight muted"><li>Easiest: on the Tally PC run <b>python tally_bridge.py ledgers "${esc(d.tallyName||d.name)}"</b> – it makes a CSV.</li><li>Or from Tally: Display → List of Accounts → Export (Excel/CSV).</li><li>Or paste names below, one per line.</li></ul>
+   <div class="row"><button data-act="loadLedgers">Load ledger file</button></div><textarea id="ledPaste" placeholder="Paste ledger names, one per line" style="margin-top:8px"></textarea><div class="row" style="margin-top:6px"><button data-act="pasteLedgers">Save pasted list</button></div></div>
+  <div class="card"><h3>Backup</h3><p class="muted">Download all data for this company (bills, filing status) as a JSON file, or restore one.</p><div class="row"><button data-act="backup">Download backup</button><button data-act="restore">Restore backup</button></div></div>`:''}`;
+}
+function onCoInput(el){ const path=el.dataset.co.split('.'); let o=S.coDraft; for(let i=0;i<path.length-1;i++){ o[path[i]]=o[path[i]]||{}; o=o[path[i]]; } let v=el.value; if(['tallyPort','qrmpDay'].includes(path[0])&&v!=='') v=+v; if(path[path.length-1]==='rate') v=+v||0; if(path[0]==='gstin'||path[0]==='tan') v=String(v).toUpperCase().trim(); o[path[path.length-1]]=v; if(el.tagName==='SELECT'||path[0]==='gstin') render(); }
+async function saveLedgers(names){
+  const c=co(); names=[...new Set(names.map(s=>String(s).trim()).filter(Boolean))];
+  const old=await Store.get('ledgers',c.id+'_0'); // chunk docs of 2500 names
+  for(let i=0;i<Math.max(1,Math.ceil(names.length/2500));i++) await Store.set('ledgers',`${c.id}_${i}`,{cid:c.id,names:names.slice(i*2500,(i+1)*2500),at:new Date().toISOString()});
+  for(let i=Math.ceil(names.length/2500);i<20;i++){ const ex=await Store.get('ledgers',`${c.id}_${i}`); if(!ex) break; await Store.del('ledgers',`${c.id}_${i}`); }
+  toast(`${names.length} ledgers saved`); await logIt(`Ledger list loaded (${names.length})`);
+}
+function parseLedgerFile(name,buf,text){
+  if(/\.xlsx?$/i.test(name)&&window.XLSX){ const wb=XLSX.read(buf,{type:'array'}); const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1}); return pickNameCol(rows); }
+  if(/<LEDGER/i.test(text)){ return [...text.matchAll(/<LEDGER[^>]*NAME="([^"]+)"/gi)].map(m=>m[1].replace(/&amp;/g,'&')); }
+  const rows=text.split(/\r?\n/).map(l=>l.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(x=>x.replace(/^"|"$/g,'').replace(/""/g,'"')));
+  return pickNameCol(rows);
+}
+function pickNameCol(rows){ if(!rows.length) return []; const h=(rows[0]||[]).map(x=>String(x||'').toLowerCase()); let ci=h.findIndex(x=>/name|particulars|ledger/.test(x)); const start=ci>=0?1:0; if(ci<0) ci=0; return rows.slice(start).map(r=>r&&r[ci]).filter(x=>x&&String(x).trim()); }
+
+// ---------- activity ----------
+function vLog(c){ return `<div class="card"><h2>Activity – ${esc(c.short||c.name)}</h2><p class="muted">Every bill read, approval, Tally file and filing step is recorded here.</p>${S.logs.length?miniTable(S.logs.slice(0,200).map(l=>[new Date(l.t).toLocaleString('en-IN'),l.msg]),['When','What']):'<p class="muted">Nothing yet.</p>'}</div>`; }
+
+// ---------- modal & filing permission ----------
+function openModal(html){ $('#modalBox').innerHTML=html; $('#modal').classList.add('on'); }
+function closeModal(){ $('#modal').classList.remove('on'); }
+function findTask(cid,key){ const cmp=S.companies.find(x=>x.id===cid); const [kind,per]=[key.split('_')[0],key.split('_')[1]]; const [y,m]=per.split('-').map(Number);
+  for(let k=0;k<3;k++){ const dt=new Date(y,m-1+k,1); const t=dueTasks(cmp,dt.getFullYear(),dt.getMonth()+1).find(x=>x.key===key); if(t) return {t,cmp}; } return {t:null,cmp}; }
+function filingModal(cid,key){
+  const {t,cmp}=findTask(cid,key); if(!t) return; const p=PORTALS[t.portal]; const steps=STEPS[stepKey(key)]||[];
+  openModal(`<div class="row"><div class="lock">🔐</div><div><h3>Permission needed</h3><div class="muted">${esc(cmp.short||cmp.name)} · ${esc(t.title)} · ${esc(t.period)}</div></div></div>
+  <div class="banner" style="background:var(--infobg);color:var(--info);margin-top:12px">This step needs your <b>login, password, captcha and OTP</b> on the official <b>${esc(p.name)}</b>. You type them there yourself. This app never asks for them and never stores them.</div>
+  <b>Steps</b><ol>${steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>
+  <label class="row" style="gap:8px;margin:6px 0"><input type="checkbox" id="pc1"> The address bar shows <b>${esc(p.host)}</b> before I type anything</label>
+  <label class="row" style="gap:8px;margin:6px 0"><input type="checkbox" id="pc2"> I will enter the password and OTP myself</label>
+  <div class="row" style="margin-top:12px"><a id="portalGo" href="${p.url}" target="_blank" rel="noopener" style="pointer-events:none;opacity:.45" data-act="portalGo" data-cid="${cid}" data-key="${key}"><button class="primary" type="button">Allow &amp; open ${esc(p.name)}</button></a><button data-act="close">Not now</button></div>
+  <p class="muted">Link opens outside this app: ${esc(p.url)}</p>
+  <hr class="sep"><label class="f">Due date (change only if the government extended it)<input type="date" id="dueOv" value="${esc(S.allTasks[cid+'|'+key]?.dueOverride||t.dueISO)}"></label><button class="small" style="margin-top:6px" data-act="saveDue" data-cid="${cid}" data-key="${key}">Save due date</button>`);
+}
+function filedModal(cid,key){
+  const {t,cmp}=findTask(cid,key);
+  openModal(`<h3>Mark as filed</h3><div class="muted">${esc(cmp.short||cmp.name)} · ${esc(t?.title||key)} · ${esc(t?.period||'')}</div>
+  <div class="grid2" style="margin-top:10px"><label class="f">Filed on<input type="date" id="fOn" value="${isoDate(new Date())}"></label><label class="f">ARN / acknowledgement / CIN / token no.<input id="fAck" placeholder="from the portal"></label><label class="f">Amount paid ₹ (if any)<input id="fAmt" inputmode="decimal"></label><label class="f">Note<input id="fNote"></label></div>
+  <div class="row" style="margin-top:12px"><button class="primary" data-act="saveFiled" data-cid="${cid}" data-key="${key}">Save</button><button data-act="close">Cancel</button></div>`);
+}
+async function setTask(cid,key,patch){ const id=`${cid}_${key}`; const cur=(await Store.get('tasks',id))||{cid,key}; await Store.set('tasks',id,{...cur,...patch,cid,key}); }
+
+// ---------- events ----------
+document.addEventListener('click',async e=>{
+  const tabEl=e.target.closest('[data-tab]'); if(tabEl&&!e.target.closest('[data-act]')){ e.preventDefault(); S.tab=tabEl.dataset.tab; S.coDraft=null; setHash(); render(); window.scrollTo(0,0); return; }
+  const a=e.target.closest('[data-act]'); if(!a) return; const act=a.dataset.act; const b=a.dataset.bill?S.bills.find(x=>x.id===a.dataset.bill):null;
+  const putBill=async(bb,patch)=>{ const {id,...rest}=bb; await Store.set('bills',bb.id,{...rest,...patch}); };
+  try{
+  switch(act){
+    case 'pick': $('#fileIn').click(); break;
+    case 'manual': { const c=co(); const id=uid(); await Store.set('bills',id,{cid:c.id,status:'draft',createdAt:new Date().toISOString(),source:'typed by hand',supplierName:'',supplierGSTIN:'',invoiceNo:'',invoiceDate:'',lines:[{description:'',hsn:'',rate:18,taxable:0,cgst:0,sgst:0,igst:0,cess:0,ledger:c.defaultPurchase||''}],roundOff:0,total:0,voucherType:c.purchaseVchType||'Purchase',tds:{on:false}}); S.tab='review'; render(); break; }
+    case 'addLine': b.lines.push({description:'',hsn:'',rate:18,taxable:0,cgst:0,sgst:0,igst:0,cess:0,ledger:co().defaultPurchase||''}); await putBill(b,{}); rerenderCard(b); break;
+    case 'delLine': b.lines.splice(+a.dataset.line,1); await putBill(b,{}); rerenderCard(b); break;
+    case 'approve': await putBill(b,{status:'approved',approvedAt:new Date().toISOString(),approvedBy:Store.me||'local',tallyError:''}); await logIt(`Approved: ${b.supplierName} #${b.invoiceNo}`); toast('Approved – ready for Tally'); break;
+    case 'unapprove': await putBill(b,{status:'draft'}); break;
+    case 'delBill': openModal(`<h3>Delete this bill?</h3><p>${esc(b.supplierName)} #${esc(b.invoiceNo)}</p><div class="row"><button class="danger" data-act="delBillYes" data-bill="${b.id}">Delete</button><button data-act="close">Cancel</button></div>`); break;
+    case 'delBillYes': await Store.del('bills',b.id); await logIt(`Deleted bill ${b.supplierName} #${b.invoiceNo}`); closeModal(); break;
+    case 'export': await doExport(); break;
+    case 'posted': await putBill(b,{status:'posted',postedAt:new Date().toISOString()}); await logIt(`Posted in Tally: ${b.supplierName} #${b.invoiceNo}`); break;
+    case 'tallyFail': openModal(`<h3>Tally error</h3><label class="f">What did Tally / the bridge say?<input id="tErr"></label><div class="row" style="margin-top:10px"><button class="primary" data-act="tallyFailSave" data-bill="${b.id}">Send back to review</button><button data-act="close">Cancel</button></div>`); break;
+    case 'tallyFailSave': await putBill(b,{status:'failed',tallyError:$('#tErr').value}); await logIt(`Tally error: ${b.supplierName} #${b.invoiceNo}`); closeModal(); break;
+    case 'file': filingModal(a.dataset.cid,a.dataset.key); break;
+    case 'portalGo': if(!($('#pc1').checked&&$('#pc2').checked)){ e.preventDefault(); toast('Tick both boxes first'); break; } await setTask(a.dataset.cid,a.dataset.key,{status:'started',startedAt:new Date().toISOString()}); if(a.dataset.cid===S.cid) logIt(`Opened portal for ${a.dataset.key} (user permitted)`); setTimeout(()=>filedModal(a.dataset.cid,a.dataset.key),600); break;
+    case 'saveDue': await setTask(a.dataset.cid,a.dataset.key,{dueOverride:$('#dueOv').value}); toast('Due date saved'); closeModal(); break;
+    case 'markFiled': filedModal(a.dataset.cid,a.dataset.key); break;
+    case 'saveFiled': await setTask(a.dataset.cid,a.dataset.key,{status:'filed',filedOn:$('#fOn').value,ack:$('#fAck').value,amount:$('#fAmt').value,note:$('#fNote').value}); if(a.dataset.cid===S.cid) await logIt(`Filed ${a.dataset.key} – ack ${$('#fAck').value||'—'}`); closeModal(); toast('Marked as filed'); break;
+    case 'reopen': await setTask(a.dataset.cid,a.dataset.key,{status:'open'}); break;
+    case 'close': closeModal(); break;
+    case 'copyTxt': { const t=$('#cpTxt'); try{ await navigator.clipboard.writeText(t.value); toast('Copied'); }catch(x){ t.select(); toast('Press Ctrl+C to copy'); } break; }
+    case 'newCo': S.coDraft=blankCo(); render(); break;
+    case 'cancelCo': S.coDraft=null; render(); break;
+    case 'saveCo': { const d=S.coDraft; if(!d.name){toast('Enter the company name'); break;} if(d.gstin&&!gstinValid(d.gstin)){toast('GSTIN check digit fails');} const id=d.id||uid(); const {id:_,...rest}=d; rest.short=rest.short||rest.name; rest.tallyName=rest.tallyName||rest.name; if(!rest.trackFrom) rest.trackFrom=isoDate(new Date()).slice(0,8)+'01'; await Store.set('companies',id,rest); S.cid=id; try{localStorage.setItem('kad_cid',id)}catch(x){} S.coDraft=null; subscribeCompany(); renderCoSel(); toast('Company saved'); break; }
+    case 'delCo': openModal(`<h3>Delete ${esc(co().name)}?</h3><p>The company setup is removed. Bills already entered stay in storage but are hidden.</p><div class="row"><button class="danger" data-act="delCoYes">Delete</button><button data-act="close">Cancel</button></div>`); break;
+    case 'delCoYes': await Store.del('companies',S.cid); S.cid=null; S.coDraft=null; closeModal(); break;
+    case 'loadLedgers': $('#ledgerIn').click(); break;
+    case 'pasteLedgers': await saveLedgers($('#ledPaste').value.split(/\r?\n/)); break;
+    case 'load2b': $('#b2bIn').click(); break;
+    case 'gstCsv': { const c=co(); const pb=periodBills(c,S.month); const rows=[['Invoice date','Supplier','Supplier GSTIN','Invoice no','GST rate','Taxable','CGST','SGST','IGST','Cess','Bill total','Status']]; pb.forEach(b=>b.lines.forEach(l=>rows.push([b.invoiceDate,b.supplierName,b.supplierGSTIN,b.invoiceNo,l.rate,l.taxable,l.cgst,l.sgst,l.igst,l.cess||0,b.total,b.status]))); await saveFile(`purchase_register_${c.code||'co'}_${S.month}.csv`,csv(rows)); break; }
+    case 'tdsCsv': case 'tdsQCsv': { const c=co(); let months=[S.month]; if(act==='tdsQCsv'){ const [y,m]=S.month.split('-').map(Number); const qs=m-((m-1)%3); months=[0,1,2].map(i=>`${y}-${String(qs+i).padStart(2,'0')}`); }
+      const pb=months.flatMap(mm=>periodBills(c,mm)).filter(b=>b.tds&&b.tds.on); const rows=[['Date of credit','Party','PAN (from GSTIN)','Section/nature','Amount paid/credited','TDS rate %','TDS amount','Invoice no']]; pb.forEach(b=>{const k=billCalc(b); rows.push([b.postDate||b.invoiceDate,b.supplierName,b.supplierGSTIN?b.supplierGSTIN.slice(2,12):'',b.tds.section,+b.tds.base||k.taxable,b.tds.rate,k.tds,b.invoiceNo]);});
+      await saveFile(`tds_register_${c.code||'co'}_${months[0]}${months.length>1?'_quarter':''}.csv`,csv(rows)); break; }
+    case 'backup': { const c=co(); const tasks=Object.values(S.tasks); await saveFile(`backup_${c.code||'co'}_${isoDate(new Date())}.json`,JSON.stringify({version:1,company:c,bills:S.bills,tasks,ledgers:S.ledgers},null,1)); break; }
+    case 'restore': $('#restoreIn').click(); break;
+  }}catch(err){ console.error(err); }
+});
+document.addEventListener('input',e=>{ const el=e.target; if(el.dataset.bill) onBillInput(el); else if(el.dataset.co) onCoInput(el); else if(el.id==='monthSel'&&el.value){ S.month=el.value; S.b2b=null; render(); } });
+document.addEventListener('change',e=>{ const el=e.target; if(el.dataset.bill&&(el.type==='checkbox'||el.tagName==='SELECT')) onBillInput(el); if(el.dataset.co&&el.tagName==='SELECT') onCoInput(el);
+  const pc=$('#portalGo'); if(pc&&(el.id==='pc1'||el.id==='pc2')){ const ok=$('#pc1').checked&&$('#pc2').checked; pc.style.pointerEvents=ok?'auto':'none'; pc.style.opacity=ok?1:.45; } });
+$('#modal').addEventListener('click',e=>{ if(e.target.id==='modal') closeModal(); });
+$('#fileIn').onchange=e=>{ addFiles([...e.target.files]); e.target.value=''; };
+function addFiles(files){ files.forEach(f=>S.queue.push({id:uid(),name:f.name,file:f,state:'wait'})); render(); readQueue(); }
+document.addEventListener('dragover',e=>{ const d=e.target.closest&&e.target.closest('#drop'); if(d){e.preventDefault(); d.classList.add('hot');} });
+document.addEventListener('dragleave',e=>{ const d=e.target.closest&&e.target.closest('#drop'); if(d) d.classList.remove('hot'); });
+document.addEventListener('drop',e=>{ const d=e.target.closest&&e.target.closest('#drop'); if(d){ e.preventDefault(); d.classList.remove('hot'); addFiles([...e.dataTransfer.files]); } });
+$('#ledgerIn').onchange=async e=>{ const f=e.target.files[0]; if(!f) return; const buf=await f.arrayBuffer(); const text=new TextDecoder().decode(buf); const names=parseLedgerFile(f.name,buf,text); await saveLedgers(names); e.target.value=''; };
+$('#b2bIn').onchange=async e=>{ const f=e.target.files[0]; if(!f) return; try{ S.b2b=parse2B(JSON.parse(await f.text())); toast(`${S.b2b.length} invoices in 2B`); render(); }catch(x){ toast('Not a GSTR-2B JSON file'); } e.target.value=''; };
+$('#restoreIn').onchange=async e=>{ const f=e.target.files[0]; if(!f) return; try{ const j=JSON.parse(await f.text()); const c=co(); if(!c) throw 0; for(const b of j.bills||[]){ const {id,...rest}=b; await Store.set('bills',id||uid(),{...rest,cid:c.id}); } for(const t of j.tasks||[]){ const {id,...rest}=t; await Store.set('tasks',`${c.id}_${t.key}`,{...rest,cid:c.id}); } if(j.ledgers?.length) await saveLedgers(j.ledgers); toast('Backup restored'); }catch(x){ toast('Could not read backup'); } e.target.value=''; };
+
+</script>
+<script>
+/*CORE2-START*/
+// ---------- bank & accounts: pure helpers ----------
+const MON={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,sept:9,oct:10,nov:11,dec:12};
+function fmtYMD(y,m,d){ if(!(m>=1&&m<=12&&d>=1&&d<=31&&y>1990&&y<2100)) return ''; return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
+function parseDateIN(v){
+  if(v==null||v==='') return '';
+  if(typeof v==='number'&&v>20000&&v<80000){ const d=new Date(Math.round((v-25569)*864e5)); return fmtYMD(d.getUTCFullYear(),d.getUTCMonth()+1,d.getUTCDate()); }
+  if(v instanceof Date&&!isNaN(v)) return fmtYMD(v.getFullYear(),v.getMonth()+1,v.getDate());
+  const s=String(v).trim(); let m;
+  if((m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))) return fmtYMD(+m[1],+m[2],+m[3]);
+  if((m=s.match(/^(\d{1,2})[\/\-. ](\d{1,2})[\/\-. ](\d{2,4})\b/))){ let y=+m[3]; if(y<100) y+=2000; return fmtYMD(y,+m[2],+m[1]); }
+  if((m=s.match(/^(\d{1,2})[\/\-. ]?([A-Za-z]{3,4})[A-Za-z]*[\/\-. ,]*(\d{2,4})\b/))&&MON[m[2].toLowerCase()]){ let y=+m[3]; if(y<100) y+=2000; return fmtYMD(y,MON[m[2].toLowerCase()],+m[1]); }
+  return '';
+}
+const num=v=>{ if(typeof v==='number') return v; let s=String(v??'').replace(/[,₹\s]/g,''); const neg=/^\(.*\)$/.test(s)||/dr$/i.test(s); s=s.replace(/[()]/g,'').replace(/(cr|dr)$/i,''); const n=parseFloat(s); return isNaN(n)?0:(neg?-Math.abs(n):n); };
+function detectCols(rows){
+  for(let i=0;i<Math.min(rows.length,40);i++){
+    const h=(rows[i]||[]).map(x=>String(x??'').toLowerCase().replace(/\s+/g,' ').trim());
+    const find=(re,not)=>h.findIndex(x=>re.test(x)&&!(not&&not.test(x)));
+    const date=find(/date/,/value date/)>=0?find(/date/,/value date/):find(/date/);
+    const narr=find(/narration|description|particulars|remarks|details/);
+    if(date<0||narr<0) continue;
+    const dr=find(/withdraw|debit|^dr\.?$|paid out/), cr=find(/deposit|credit|^cr\.?$|paid in/), bal=find(/balance/), ref=find(/chq|cheque|ref/,/narration|description|particulars/), amt=find(/amount/), typ=find(/dr\s*\/\s*cr|cr\s*\/\s*dr|^type$/);
+    if((dr>=0&&cr>=0)||(amt>=0&&typ>=0)) return {head:i,date,narr,dr,cr,bal,ref,amt,typ};
+  }
+  return null;
+}
+function rowsToTxns(rows,map){
+  const out=[];
+  for(let i=map.head+1;i<rows.length;i++){ const r=rows[i]||[]; const date=parseDateIN(r[map.date]); if(!date) continue;
+    let dr=0,cr=0;
+    if(map.dr>=0&&map.cr>=0){ dr=Math.abs(num(r[map.dr])); cr=Math.abs(num(r[map.cr])); }
+    else { const a=Math.abs(num(r[map.amt])); if(/d/i.test(String(r[map.typ]))) dr=a; else cr=a; }
+    if(!dr&&!cr) continue;
+    out.push({date,narr:String(r[map.narr]??'').replace(/\s+/g,' ').trim(),ref:map.ref>=0?String(r[map.ref]??'').trim():'',dr:r2(dr),cr:r2(cr),bal:map.bal>=0&&r[map.bal]!==''&&r[map.bal]!=null?r2(num(r[map.bal])):null});
+  }
+  return out;
+}
+// Running-balance check: flags rows where previous balance − withdrawal + deposit ≠ balance.
+function balanceBreaks(txns){
+  const bad=[]; let dir=0;
+  for(let i=1;i<txns.length;i++){ const a=txns[i-1],b=txns[i]; if(a.bal==null||b.bal==null) continue;
+    const fwd=Math.abs(r2(a.bal-b.dr+b.cr)-b.bal)<0.02, rev=Math.abs(r2(b.bal-a.dr+a.cr)-a.bal)<0.02;
+    if(!dir){ if(fwd) dir=1; else if(rev) dir=-1; }
+    if(dir===1&&!fwd||dir===-1&&!rev||(!dir&&!fwd&&!rev)) bad.push(i); }
+  return bad;
+}
+function txnHash(t){ return [t.date,r2(t.dr),r2(t.cr),norm(t.narr).slice(0,40),t.bal==null?'':r2(t.bal)].join('|'); }
+function hashId(s){ let h1=0x811c9dc5,h2=0; for(let i=0;i<s.length;i++){ h1=Math.imul(h1^s.charCodeAt(i),16777619)>>>0; h2=(h2*31+s.charCodeAt(i))>>>0; } return h1.toString(36)+h2.toString(36); }
+function firstTdsLedger(co){ const v=Object.values(co.tdsMap||{}); return (v[0]&&v[0].ledger)||'TDS Payable'; }
+function classifyTxn(t,ctx){
+  const co=ctx.co, n=String(t.narr||'').toUpperCase(), dr=t.dr>0;
+  const res=(ledger,kind,reason,extra={})=>({ledger,kind,reason,vtype:kind==='contra'?(co.contraVchType||'Contra'):dr?(co.paymentVchType||'Payment'):(co.receiptVchType||'Receipt'),billId:'',billRef:'',...extra});
+  for(const r of (co.bankRules||[])) if(r.k&&n.includes(String(r.k).toUpperCase())&&(!r.dir||r.dir===(dr?'dr':'cr'))) return res(r.ledger,r.kind||'rule',`Your rule: “${r.k}”`);
+  for(const b of (ctx.banks||[])) if(b.ledger!==ctx.bank&&b.last4&&new RegExp('\\b\\d*'+b.last4+'\\b').test(n)) return res(b.ledger,'contra','Transfer with own account …'+b.last4);
+  if(dr&&/ITNS\s*-?\s*281|\bTDS\b|TDS\/TCS|\b281\b/.test(n)) return res(co.tdsChallanLedger||firstTdsLedger(co),'tds','Looks like a TDS challan');
+  if(dr&&/CBDT|OLTAS|INCOME\s*TAX|ITNS|E-?PAY\s*TAX/.test(n)) return res(co.advTaxLedger||'Advance Tax','itax','Looks like an income-tax payment');
+  if(dr&&/\bGST\b|CPIN|GSTN|CBIC|PMT-?06/.test(n)&&!/CHG|CHARGE|ON\s*CHG|COMM|FEE/.test(n)) return res(co.gstCashLedger||'Electronic Cash Ledger (GST)','gst','Looks like a GST payment');
+  if(dr&&/CHG|CHRG|CHARGES|SMS|COMMISSION|ANNUAL FEE|MIN\.? ?BAL|CARD FEE|GST ON|\bAMC\b|PROCESSING FEE/.test(n)&&t.dr<=25000) return res(co.bankChargesLedger||'Bank Charges','charges','Bank charges');
+  if(!dr&&/\bINT\b|INTEREST|INT\.?PD|INT\.?CR/.test(n)) return res(co.interestRecdLedger||'Interest Received','interest','Interest credited');
+  if(dr&&/\bINT\b|INTEREST/.test(n)) return res(co.interestPaidLedger||'Interest Paid','interest','Interest debited');
+  if(dr&&/SALARY|\bSAL\b|PAYROLL/.test(n)) return res(co.salaryLedger||'Salary Payable','salary','Salary');
+  if(dr){ const cand=(ctx.bills||[]).filter(b=>['approved','sent','posted'].includes(b.status)&&!b.paidTxn&&!(ctx.usedBills&&ctx.usedBills.has(b.id))&&Math.abs(billCalc(b).party-t.dr)<0.5);
+    const named=cand.filter(b=>{const w=norm(b.supplierName).slice(0,5); return w.length>=4&&norm(n).includes(w);});
+    const pick=named[0]||(cand.length===1?cand[0]:null);
+    if(pick){ ctx.usedBills&&ctx.usedBills.add(pick.id); return res(pick.partyLedger||pick.supplierName,'bill',`Pays bill ${pick.invoiceNo} (${pick.supplierName})`,{billId:pick.id,billRef:pick.invoiceNo}); } }
+  const nn=norm(n); let best='';
+  (ctx.ledgers||[]).forEach(l=>{ const ln=norm(l); if(ln.length>=5&&nn.includes(ln)&&ln.length>best.length) best=l; });
+  if(best) return res(best,'party','Ledger name found in narration');
+  return res('','unknown','Choose a ledger');
+}
+function envelope(co,msgs,report='Vouchers'){ return `<?xml version="1.0" encoding="UTF-8"?>\n<ENVELOPE><HEADER><TALLYREQUEST>Import Data</TALLYREQUEST></HEADER><BODY><IMPORTDATA><REQUESTDESC><REPORTNAME>${report}</REPORTNAME><STATICVARIABLES><SVCURRENTCOMPANY>${xesc(co.tallyName||co.name)}</SVCURRENTCOMPANY></STATICVARIABLES></REQUESTDESC><REQUESTDATA>\n${msgs}</REQUESTDATA></IMPORTDATA></BODY></ENVELOPE>\n`; }
+function ledEntry(led,isDr,a,party,bill){ const v=r2(isDr?-a:a).toFixed(2); return `<ALLLEDGERENTRIES.LIST><LEDGERNAME>${xesc(led)}</LEDGERNAME><ISDEEMEDPOSITIVE>${isDr?'Yes':'No'}</ISDEEMEDPOSITIVE>${party?'<ISPARTYLEDGER>Yes</ISPARTYLEDGER>':''}<AMOUNT>${v}</AMOUNT>${bill?`<BILLALLOCATIONS.LIST><NAME>${xesc(bill)}</NAME><BILLTYPE>Agst Ref</BILLTYPE><AMOUNT>${v}</AMOUNT></BILLALLOCATIONS.LIST>`:''}</ALLLEDGERENTRIES.LIST>`; }
+function vchHead(vt,date,party,narr){ const d=String(date).replace(/-/g,''); return `<VOUCHER VCHTYPE="${xesc(vt)}" ACTION="Create" OBJVIEW="Accounting Voucher View"><DATE>${d}</DATE><EFFECTIVEDATE>${d}</EFFECTIVEDATE><VOUCHERTYPENAME>${xesc(vt)}</VOUCHERTYPENAME>${party?`<PARTYLEDGERNAME>${xesc(party)}</PARTYLEDGERNAME>`:''}<PERSISTEDVIEW>Accounting Voucher View</PERSISTEDVIEW><NARRATION>${xesc(narr)}</NARRATION>`; }
+// Money out: ledger Dr / bank Cr. Money in: bank Dr / ledger Cr.
+function bankXML(txns,co,bankLedger){
+  let msgs='';
+  txns.forEach(t=>{ const out=t.dr>0, a=out?t.dr:t.cr; const vt=t.vtype||(out?'Payment':'Receipt');
+    const narr=`${t.narr}${t.ref?' · Ref '+t.ref:''} [KADB:${t.id}]`;
+    msgs+=`<TALLYMESSAGE xmlns:UDF="TallyUDF">${vchHead(vt,t.date,t.ledger,narr)}${ledEntry(t.ledger,out,a,true,t.billRef)}${ledEntry(bankLedger,!out,a,false,null)}</VOUCHER></TALLYMESSAGE>\n`; });
+  return envelope(co,msgs);
+}
+function journalXML(adjs,co){
+  let msgs='';
+  adjs.forEach(j=>{ const vt=co.journalVchType||'Journal'; const narr=`${j.narration||j.kind||'Provision'} [KADJ:${j.id}]`;
+    msgs+=`<TALLYMESSAGE xmlns:UDF="TallyUDF">${vchHead(vt,j.date,'',narr)}${ledEntry(j.drLedger,true,+j.amount,false,null)}${ledEntry(j.crLedger,false,+j.amount,false,null)}</VOUCHER></TALLYMESSAGE>\n`; });
+  return envelope(co,msgs);
+}
+// Statement vs Tally bank book. Statement deposit (cr) ↔ book Dr; statement withdrawal (dr) ↔ book Cr.
+function matchBank(stmt,books,days=5){
+  const used=new Set(), matched=[], stmtOnly=[];
+  const dd=(a,b)=>Math.abs((new Date(a)-new Date(b))/864e5);
+  stmt.forEach(t=>{ const amt=t.dr||t.cr, inBook=t.cr>0; let best=-1,bd=99;
+    books.forEach((b,i)=>{ if(used.has(i)) return; const bAmt=inBook?b.dr:b.cr; if(!(Math.abs(bAmt-amt)<0.01)) return; const d=dd(t.date,b.date); if(d<=days&&d<bd){bd=d;best=i;} });
+    if(best>=0){ used.add(best); matched.push({t,b:books[best]}); } else stmtOnly.push(t); });
+  const booksOnly=books.filter((b,i)=>!used.has(i));
+  return {matched,stmtOnly,booksOnly};
+}
+// ---- financial statements from a Tally trial-balance snapshot ----
+const PG={sales:'Sales Accounts',purch:'Purchase Accounts',dinc:'Direct Incomes',dexp:'Direct Expenses',iinc:'Indirect Incomes',iexp:'Indirect Expenses',cap:'Capital Account',loan:'Loans (Liability)',cl:'Current Liabilities',fa:'Fixed Assets',inv:'Investments',ca:'Current Assets',misc:'Misc. Expenses (ASSET)',susp:'Suspense A/c',br:'Branch / Divisions'};
+const isPL=n=>/^profit\s*&\s*loss/i.test(n||'');
+function tbNet(tb,adjs){
+  // net closing per ledger, Dr positive; applies pending provision journals
+  const m=new Map();
+  (tb.rows||[]).filter(r=>r.type!=='STOCK').forEach(r=>m.set(r.name,{...r,open:r2((+r.odr||0)-(+r.ocr||0)),net:r2((+r.cdr||0)-(+r.ccr||0)),adj:0}));
+  const missing=[];
+  (adjs||[]).forEach(j=>{ [[j.drLedger,+j.amount],[j.crLedger,-(+j.amount)]].forEach(([n,a])=>{ const x=m.get(n); if(x){ x.net=r2(x.net+a); x.adj=r2(x.adj+a); } else missing.push(n); }); });
+  return {rows:[...m.values()],missing:[...new Set(missing)]};
+}
+function buildFS(tb,opts={}){
+  const {rows,missing}=tbNet(tb,opts.adjs);
+  const sum=f=>r2(rows.filter(f).reduce((s,r)=>s+r.net,0));
+  const byP=p=>sum(r=>r.primary===p);
+  const known=new Set(Object.values(PG));
+  const other=rows.filter(r=>!known.has(r.primary)&&!isPL(r.name));
+  const stockItems=(tb.rows||[]).filter(r=>r.type==='STOCK');
+  const stockLedOpen=r2(rows.filter(r=>r.sub==='Stock-in-Hand').reduce((s,r)=>s+r.open,0)), stockLedClose=r2(rows.filter(r=>r.sub==='Stock-in-Hand').reduce((s,r)=>s+r.net,0));
+  const itemsOpen=r2(stockItems.reduce((s,r)=>s+(+r.odr||0),0)), itemsClose=r2(stockItems.reduce((s,r)=>s+(+r.cdr||0),0));
+  const openStock=stockItems.length?itemsOpen:stockLedOpen;
+  const closeStock=opts.closingStock!=null&&opts.closingStock!==''?+opts.closingStock:(stockItems.length?itemsClose:stockLedClose);
+  const otherRev=other.filter(r=>r.isRev==='Yes');
+  const sales=r2(-byP(PG.sales)), dinc=r2(-byP(PG.dinc)), purch=byP(PG.purch), dexp=byP(PG.dexp);
+  const otherGP=r2(-otherRev.filter(r=>r.affGP==='Yes').reduce((s,r)=>s+r.net,0));
+  const gp=r2(sales+dinc+otherGP+closeStock-openStock-purch-dexp);
+  const iinc=r2(-byP(PG.iinc)), iexp=byP(PG.iexp);
+  const otherNP=r2(-otherRev.filter(r=>r.affGP!=='Yes').reduce((s,r)=>s+r.net,0));
+  const np=r2(gp+iinc-iexp+otherNP);
+  const pl={sales,dinc,openStock,purch,dexp,closeStock,gp,iinc,iexp,otherGP,otherNP,np,revenue:r2(sales+dinc+iinc)};
+  // balance sheet (credit = positive on liabilities side)
+  const cr=f=>r2(-sum(f)), dr=f=>sum(f);
+  const plOpen=r2(-rows.filter(r=>isPL(r.name)).reduce((s,r)=>s+r.open,0));
+  const sub=(p,s)=>r=>r.primary===p&&r.sub===s;
+  const notSubs=(p,ss)=>r=>r.primary===p&&!ss.includes(r.sub);
+  const L={
+    shareCapital:cr(notSubs(PG.cap,['Reserves & Surplus'])),
+    reserves:r2(cr(sub(PG.cap,'Reserves & Surplus'))+plOpen+np),
+    borrowings:cr(r=>r.primary===PG.loan),
+    tradePayables:cr(sub(PG.cl,'Sundry Creditors')),
+    dutiesTaxes:cr(sub(PG.cl,'Duties & Taxes')),
+    provisions:cr(sub(PG.cl,'Provisions')),
+    otherCL:cr(notSubs(PG.cl,['Sundry Creditors','Duties & Taxes','Provisions'])),
+    suspense:cr(r=>r.primary===PG.susp),
+  };
+  const A={
+    ppe:dr(r=>r.primary===PG.fa),
+    investments:dr(r=>r.primary===PG.inv),
+    inventories:r2(closeStock+(stockItems.length?stockLedClose:0)),
+    tradeReceivables:dr(sub(PG.ca,'Sundry Debtors')),
+    cashBank:dr(r=>r.primary===PG.ca&&['Bank Accounts','Cash-in-Hand'].includes(r.sub)),
+    loansAdvances:dr(sub(PG.ca,'Loans & Advances (Asset)')),
+    deposits:dr(sub(PG.ca,'Deposits (Asset)')),
+    otherCA:dr(notSubs(PG.ca,['Sundry Debtors','Bank Accounts','Cash-in-Hand','Loans & Advances (Asset)','Deposits (Asset)','Stock-in-Hand'])),
+    misc:dr(r=>r.primary===PG.misc),
+    branch:dr(r=>r.primary===PG.br),
+  };
+  const otherBS=other.filter(r=>r.isRev!=='Yes'); const otherBSnet=r2(otherBS.reduce((s,r)=>s+r.net,0));
+  if(otherBSnet>0) A.otherUnmapped=otherBSnet; else if(otherBSnet<0) L.otherUnmapped=-otherBSnet;
+  const totL=r2(Object.values(L).reduce((s,x)=>s+x,0)), totA=r2(Object.values(A).reduce((s,x)=>s+x,0));
+  const tbDr=r2(rows.reduce((s,r)=>s+(r.net>0?r.net:0),0)+(stockItems.length?itemsOpen:0)), tbCr=r2(rows.reduce((s,r)=>s+(r.net<0?-r.net:0),0));
+  return {pl,L,A,totL,totA,diff:r2(totA-totL),tbDr,tbCr,tbDiff:r2(tbDr-tbCr),rows,missing,unmapped:other.map(r=>r.name)};
+}
+function plMinus(a,b){ const o={}; Object.keys(a).forEach(k=>o[k]=r2(a[k]-(b&&k in b&&!['openStock','closeStock'].includes(k)?b[k]:0))); if(b){ o.openStock=b.closeStock; o.gp=r2(o.sales+o.dinc+o.otherGP+a.closeStock-b.closeStock-o.purch-o.dexp); o.np=r2(o.gp+o.iinc-o.iexp+o.otherNP); o.revenue=r2(o.sales+o.dinc+o.iinc); } return o; }
+function fyStart(iso){ const [y,m]=iso.split('-').map(Number); return `${m>=4?y:y-1}-04-01`; }
+function parseTBcsv(text){
+  const lines=text.replace(/^﻿/,'').split(/\r?\n/).filter(l=>l.trim());
+  let meta={}; if(/^#KAD-TB/.test(lines[0])){ const p=splitCsv(lines.shift()); meta={company:p[1],from:p[2],to:p[3]}; }
+  const head=splitCsv(lines.shift()||'').map(h=>h.toLowerCase().trim()); const ix=n=>head.indexOf(n);
+  const rows=[];
+  if(ix('closingdr')>=0){ lines.forEach(l=>{ const c=splitCsv(l); rows.push({type:c[ix('type')]||'LEDGER',name:c[ix('name')],parent:c[ix('parent')],sub:c[ix('sub')],primary:c[ix('primary')],isRev:c[ix('isrevenue')],affGP:c[ix('affectsgp')],odr:+c[ix('openingdr')]||0,ocr:+c[ix('openingcr')]||0,cdr:+c[ix('closingdr')]||0,ccr:+c[ix('closingcr')]||0}); }); }
+  else { const n=head.findIndex(h=>/name|particulars|ledger/.test(h)), p=head.findIndex(h=>/primary|group/.test(h)), s=head.findIndex(h=>/^sub/.test(h)), d=head.findIndex(h=>/debit|^dr/.test(h)), c=head.findIndex(h=>/credit|^cr/.test(h));
+    if(n<0||d<0||c<0) throw new Error('Need columns: Name, Primary group, Debit, Credit');
+    lines.forEach(l=>{ const x=splitCsv(l); if(!x[n]) return; rows.push({type:/closing stock/i.test(x[n])?'STOCK':'LEDGER',name:x[n],primary:p>=0?x[p]:'',sub:s>=0?x[s]:'',isRev:[PG.sales,PG.purch,PG.dinc,PG.dexp,PG.iinc,PG.iexp].includes(p>=0?x[p]:'')?'Yes':'No',affGP:[PG.sales,PG.purch,PG.dinc,PG.dexp].includes(p>=0?x[p]:'')?'Yes':'No',odr:0,ocr:0,cdr:Math.abs(num(x[d])),ccr:Math.abs(num(x[c]))}); }); }
+  return {meta,rows};
+}
+function splitCsv(l){ const out=[]; let cur='',q=false; for(let i=0;i<l.length;i++){ const ch=l[i]; if(q){ if(ch==='"'){ if(l[i+1]==='"'){cur+='"';i++;} else q=false; } else cur+=ch; } else if(ch==='"') q=true; else if(ch===','){ out.push(cur); cur=''; } else cur+=ch; } out.push(cur); return out.map(s=>s.trim()); }
+function cashFlow(cur,prev){
+  // Indirect method (AS 3 / Ind AS 7). cur, prev = buildFS results; prev null → from financial-year opening.
+  const openOf=new Map(); if(prev) prev.rows.forEach(r=>openOf.set(r.name,r.net));
+  const REVP=[PG.sales,PG.purch,PG.dinc,PG.dexp,PG.iinc,PG.iexp];
+  const isRevRow=r=>r.isRev==='Yes'||REVP.includes(r.primary);
+  const per=r=>prev?r2(r.net-(openOf.get(r.name)||0)):r.net;
+  const rev=cur.rows.filter(isRevRow);
+  const sumIf=f=>r2(rev.filter(f).reduce((s,r)=>s+per(r),0));
+  const isExp=r=>[PG.iexp,PG.dexp].includes(r.primary)||(r.isRev==='Yes'&&r.net>0&&!REVP.includes(r.primary));
+  const isInc=r=>[PG.iinc,PG.dinc].includes(r.primary);
+  const dep=sumIf(r=>isExp(r)&&/depreciat|amorti[sz]/i.test(r.name));
+  const taxExp=sumIf(r=>isExp(r)&&/income[- ]?tax|provision for (income )?tax|deferred tax|current tax/i.test(r.name));
+  const fin=sumIf(r=>isExp(r)&&/interest|finance (charge|cost)|loan processing/i.test(r.name)&&!/received|income|earned/i.test(r.name));
+  const intInc=r2(-sumIf(r=>isInc(r)&&/interest/i.test(r.name)));
+  const divInc=r2(-sumIf(r=>isInc(r)&&/dividend/i.test(r.name)));
+  const np=prev?r2(cur.pl.np-prev.pl.np):cur.pl.np;
+  const pbt=r2(np+taxExp);
+  const L={op:[],inv:[],fin:[]}; const add=(sec,label,v)=>{ v=r2(v); if(Math.abs(v)<0.005) return; const x=L[sec].find(l=>l[0]===label); if(x) x[1]=r2(x[1]+v); else L[sec].push([label,v]); };
+  add('op','Net profit before tax',pbt); add('op','Add: depreciation & amortisation',dep); add('op','Add: finance costs',fin); add('op','Less: interest income',-intInc); add('op','Less: dividend income',-divInc);
+  const opBefore=r2(pbt+dep+fin-intInc-divInc);
+  let cashOpen=0,cashClose=0; const wc=[];
+  cur.rows.forEach(r=>{ if(isRevRow(r)||isPL(r.name)||r.sub==='Stock-in-Hand') return;
+    const open=prev?(openOf.get(r.name)||0):r.open, close=r.net, eff=r2(-(close-open));
+    const isCash=(r.primary===PG.ca&&['Bank Accounts','Cash-in-Hand'].includes(r.sub))||(r.primary===PG.loan&&/bank od/i.test(r.sub||''));
+    if(isCash){ cashOpen+=open; cashClose+=close; return; }
+    if(/advance tax|tds receivable|tcs receivable|income[- ]?tax|self[- ]assessment|provision for (income )?tax|mat credit/i.test(r.name)) return wc.push(['tax',eff]);
+    if(r.primary===PG.ca) return wc.push([{ 'Sundry Debtors':'(Increase)/decrease in trade receivables','Loans & Advances (Asset)':'(Increase)/decrease in loans & advances','Deposits (Asset)':'(Increase)/decrease in deposits'}[r.sub]||'(Increase)/decrease in other current assets',eff]);
+    if(r.primary===PG.cl) return wc.push([{'Sundry Creditors':'Increase/(decrease) in trade payables','Duties & Taxes':'Increase/(decrease) in GST/TDS & other duties payable','Provisions':'Increase/(decrease) in provisions'}[r.sub]||'Increase/(decrease) in other current liabilities',eff]);
+    if(r.primary===PG.fa) return add('inv','Purchase of fixed assets (net of sales)',eff);
+    if(r.primary===PG.inv) return add('inv','(Purchase)/sale of investments',eff);
+    if(r.primary===PG.cap) return add('fin',r.sub==='Reserves & Surplus'?'Other changes in reserves':'Share capital raised / (returned)',eff);
+    if(r.primary===PG.loan) return add('fin','Borrowings taken / (repaid)',eff);
+    wc.push(['Other items',eff]);
+  });
+  const stockOpen=prev?prev.pl.closeStock:cur.pl.openStock;
+  wc.push(['(Increase)/decrease in inventories',r2(stockOpen-cur.pl.closeStock)]);
+  wc.filter(w=>w[0]!=='tax').forEach(w=>add('op',w[0],w[1]));
+  const tax=r2(wc.filter(w=>w[0]==='tax').reduce((s,w)=>s+w[1],0)-taxExp);
+  add('op','Less: income tax paid (net)',tax);
+  add('inv','Purchase of fixed assets (net of sales)',-dep); // depreciation reduced the asset ledgers
+  add('inv','Interest received',intInc); add('inv','Dividend received',divInc);
+  add('fin','Interest & finance costs paid',-fin);
+  const tot=k=>r2(L[k].reduce((s,l)=>s+l[1],0));
+  const op=tot('op'), inv=tot('inv'), fn=tot('fin'), net=r2(op+inv+fn);
+  cashOpen=r2(cashOpen); cashClose=r2(cashClose);
+  return {L,op,inv,fin:fn,net,opBefore,cashOpen,cashClose,actual:r2(cashClose-cashOpen),diff:r2(net-(cashClose-cashOpen))};
+}
+/*CORE2-END*/
+
+</script>
+<script>
+// ---------- bank & accounts: app ----------
+S.stmtDocs=[]; S.tbs=[]; S.adjs=[]; S.bankSel=''; S.txFilter='todo'; S.books=null; S.acctSub='pl'; S.tbSel=''; S.inclAdj=true; S.closeStockOv='';
+TABS.splice(4,0,['bank','Bank'],['accounts','Accounts']);
+const _subCo=subscribeCompany;
+subscribeCompany=function(){
+  S.stmtDocs=[]; S.tbs=[]; S.adjs=[]; S.books=null; S.tbSel='';
+  _subCo(); const c=co(); if(!c) return;
+  S.bankSel=(c.banks&&c.banks[0]&&c.banks[0].ledger)||'';
+  unsub.push(Store.sub('stmts',c.id,list=>{ S.stmtDocs=list; render(); }));
+  unsub.push(Store.sub('tbs',c.id,list=>{ S.tbs=list.sort((a,b)=>(b.to||'').localeCompare(a.to||'')); render(); }));
+  unsub.push(Store.sub('adj',c.id,list=>{ S.adjs=list.sort((a,b)=>(b.date||'').localeCompare(a.date||'')); render(); }));
+};
+const bk=l=>norm(l).slice(0,24)||'bank';
+function allTx(bank){ return S.stmtDocs.filter(d=>!bank||d.bank===bank).flatMap(d=>(d.txns||[]).map(t=>({...t,bank:d.bank}))).sort((a,b)=>a.date.localeCompare(b.date)||(a.seq||0)-(b.seq||0)); }
+function monthTx(){ return allTx(S.bankSel).filter(t=>t.date.startsWith(S.month)); }
+async function saveMonths(bank,months,txAll){
+  const c=co();
+  for(const ym of months){
+    const list=txAll.filter(t=>t.date.startsWith(ym)).map(({bank:_,...t})=>t);
+    const base=`${c.id}_${bk(bank)}_${ym.replace('-','')}`; const n=Math.max(1,Math.ceil(list.length/350));
+    for(let i=0;i<n;i++) await Store.set('stmts',`${base}_${i}`,{cid:c.id,bank,month:ym,txns:list.slice(i*350,(i+1)*350),at:new Date().toISOString()});
+    for(let i=n;i<10;i++){ const id=`${base}_${i}`; if(!S.stmtDocs.some(d=>d.id===id)) break; await Store.del('stmts',id); }
+  }
+}
+async function updateTx(ids,patch){
+  const all=allTx(S.bankSel); const months=new Set();
+  all.forEach(t=>{ if(ids.includes(t.id)){ Object.assign(t,typeof patch==='function'?patch(t):patch); months.add(t.date.slice(0,7)); } });
+  await saveMonths(S.bankSel,[...months],all);
+}
+function guessKeyword(n){ const s=String(n).toUpperCase().replace(/^(NEFT|RTGS|IMPS|UPI|ACH|NACH|ECS|BIL|BILLPAY|MB|IB|TRF|TO|BY|FROM|DR|CR)[\s\-\/:]+/g,''); const parts=s.split(/[\/\-:]+/).map(x=>x.trim()).filter(x=>x.length>=4&&!/^\d+$/.test(x)&&!/^(NEFT|RTGS|IMPS|UPI|HDFC|SBIN|ICIC|UTIB|KKBK|PUNB|CNRB|IOBA|IDIB)/.test(x)); return (parts[0]||s.slice(0,20)).slice(0,30); }
+
+// ---------- Bank tab ----------
+function vBank(c){
+  const banks=c.banks||[];
+  const ledOpts=`<datalist id="ledList3">${S.ledgers.slice(0,4000).map(l=>`<option value="${esc(l)}">`).join('')}</datalist>`;
+  const setup=`<div class="card"><div class="billhead"><h2>Bank – ${esc(c.short||c.name)}</h2>${monthPicker()}</div>
+   <div class="row" style="margin-top:8px">${banks.map(b=>`<button class="${b.ledger===S.bankSel?'primary':''}" data-act="bankPick" data-l="${esc(b.ledger)}">🏦 ${esc(b.ledger)}${b.last4?' …'+esc(b.last4):''}</button>`).join('')}
+   <button data-act="bankAddShow">+ Add bank / card / loan account</button></div>
+   <div id="bankAddBox" style="display:none;margin-top:10px" class="row"><label class="f">Ledger name in Tally<input id="bkLed" list="ledList3" style="min-width:220px"></label><label class="f">Last 4 digits of account<input id="bkL4" maxlength="6" style="width:110px"></label><button class="primary" data-act="bankAdd">Save account</button></div>
+   ${ledOpts}</div>`;
+  if(!banks.length) return setup+`<div class="card"><p>Add a bank account first – use the ledger name exactly as in Tally (e.g. “HDFC Bank CA 1234”).</p></div>`;
+  const tx=monthTx(); const all=allTx(S.bankSel);
+  const cnt=k=>tx.filter(t=>(t.status||'new')===k).length;
+  const out=r2(tx.reduce((s,t)=>s+t.dr,0)), inn=r2(tx.reduce((s,t)=>s+t.cr,0));
+  const lastBal=[...tx].reverse().find(t=>t.bal!=null)?.bal;
+  const filt={todo:t=>['new',undefined].includes(t.status),ready:t=>t.status==='ready',sent:t=>t.status==='sent',done:t=>['posted','inbooks'].includes(t.status),ignored:t=>t.status==='ignored',all:()=>true}[S.txFilter]||(()=>true);
+  const shown=tx.filter(filt);
+  const statusBar=(()=>{ const parts=[['To do',cnt('new'),'#FFCF9E'],['Ready',cnt('ready'),'#A9C3EE'],['Sent',cnt('sent'),'#E8C96A'],['Posted',cnt('posted'),'#9FD5AE'],['Already in Tally',cnt('inbooks'),'#7FC79A'],['Ignored',cnt('ignored'),'#DDD']]; const tot=Math.max(1,tx.length); let x=0; return `<svg viewBox="0 0 700 64" width="100%">${parts.map(p=>{const w=700*p[1]/tot; const g=`<rect x="${x}" y="4" width="${w}" height="26" fill="${p[2]}" stroke="#C2560C"/>`; x+=w; return g;}).join('')}${parts.map((p,i)=>`<rect x="${i*117}" y="42" width="12" height="12" fill="${p[2]}" stroke="#C2560C"/><text x="${i*117+16}" y="53" font-size="12" fill="#141414">${p[0]} ${p[1]}</text>`).join('')}</svg>`; })();
+  // insights
+  const challans=tx.filter(t=>t.kind==='tds'), gstp=tx.filter(t=>t.kind==='gst');
+  const tdsBills=new Set(S.bills.filter(b=>b.tds&&b.tds.on).map(b=>b.id));
+  const bigNoTds=tx.filter(t=>t.dr>=30000&&['party','bill','unknown','rule'].includes(t.kind)&&!(t.billId&&tdsBills.has(t.billId)));
+  const insight=`<div class="card"><h3>TDS &amp; GST from this statement</h3><div class="grid3" style="margin:8px 0">
+   <div class="kpi"><b>${challans.length}</b><span>TDS challans paid · ₹${fmt(challans.reduce((s,t)=>s+t.dr,0))}</span></div>
+   <div class="kpi"><b>${gstp.length}</b><span>GST payments · ₹${fmt(gstp.reduce((s,t)=>s+t.dr,0))}</span></div>
+   <div class="kpi" style="${bigNoTds.length?'background:var(--warnbg);border-color:#E8C96A':''}"><b>${bigNoTds.length}</b><span>Payments ≥ ₹30,000 with no TDS bill – check</span></div></div>
+   ${challans.length||gstp.length?miniTableHTML([...challans,...gstp].map(t=>[t.date,esc(t.narr),fmt(t.dr),t.kind==='tds'?'TDS':'GST',`<button class="small" data-act="linkPay" data-id="${t.id}">Record in filing calendar</button>`]),['Date','Narration','Amount','Type',''] ):''}
+   ${bigNoTds.length?`<p class="muted" style="margin-top:8px">TDS is due when the expense is credited or paid, whichever is first. Check these payments:</p>${miniTableHTML(bigNoTds.map(t=>[t.date,esc(t.narr),fmt(t.dr),esc(t.ledger||'—')]),['Date','Narration','Paid','Ledger'])}`:''}</div>`;
+  const rows=shown.map(t=>{ const st=t.status||'new'; const editable=['new','ready'].includes(st);
+    return `<tr><td>${esc(t.date)}</td><td style="max-width:320px">${esc(t.narr)}${t.ref?`<div class="muted">Ref ${esc(t.ref)}</div>`:''}${t.flag?`<div class="chk bad">✖ ${esc(t.flag)}</div>`:''}</td><td class="n">${t.dr?fmt(t.dr):''}</td><td class="n">${t.cr?fmt(t.cr):''}</td>
+    <td>${editable?`<input id="tx_${t.id}" data-tx="${t.id}" list="ledList3" value="${esc(t.ledger||'')}" style="min-width:170px">`:esc(t.ledger||'')}<div class="muted">${esc(t.vtype||'')} · ${esc(t.reason||'')}</div></td>
+    <td>${{new:'<span class="pill p-warn">To do</span>',ready:'<span class="pill p-info">Ready</span>',sent:'<span class="pill p-n">Sent</span>',posted:'<span class="pill p-ok">Posted</span>',inbooks:'<span class="pill p-ok">In Tally</span>',ignored:'<span class="pill p-n">Ignored</span>'}[st]}</td>
+    <td class="row" style="gap:4px">${st==='new'?`<button class="small primary" data-act="txOk" data-id="${t.id}" ${t.ledger?'':'disabled'}>OK</button><button class="small" data-act="txRule" data-id="${t.id}">Rule</button><button class="small" data-act="txIgnore" data-id="${t.id}">Ignore</button>`:st==='ready'||st==='ignored'?`<button class="small" data-act="txUndo" data-id="${t.id}">Undo</button>`:st==='sent'?`<button class="small primary" data-act="txPosted" data-id="${t.id}">Posted ✔</button><button class="small" data-act="txUndo" data-id="${t.id}">Back</button>`:''}</td></tr>`; }).join('');
+  let recon='';
+  if(S.books){ const r=matchBank(tx.filter(t=>t.status!=='ignored'),S.books.filter(b=>b.date.startsWith(S.month)));
+    recon=`<div class="grid3" style="margin:8px 0"><div class="kpi" style="background:var(--okbg)"><b>${r.matched.length}</b><span>Matched with Tally</span></div><div class="kpi" style="background:var(--warnbg)"><b>${r.stmtOnly.length}</b><span>In bank, not in Tally – to post</span></div><div class="kpi" style="background:var(--badbg)"><b>${r.booksOnly.length}</b><span>In Tally, not in bank – check</span></div></div>
+    <button class="primary" data-act="markInBooks">Mark ${r.matched.filter(m=>!['inbooks','posted'].includes(m.t.status)).length} matched as “already in Tally”</button>
+    ${r.booksOnly.length?`<h3 style="margin-top:10px">In Tally, not in bank (cheques not cleared, wrong date/amount, or entry error)</h3>${miniTableHTML(r.booksOnly.map(b=>[b.date,esc(b.narr||''),b.dr?fmt(b.dr):'',b.cr?fmt(b.cr):'']),['Date','Particulars','Dr (in)','Cr (out)'])}`:''}`; }
+  return setup+`<div class="card"><h3>Upload statement – ${esc(S.bankSel)}</h3>
+   <div class="drop" data-act="stmtPick"><div style="font-size:30px">🏦 📄</div><b>Choose the bank statement – Excel/CSV best, PDF or photo also works</b><div class="muted">Download it from net banking as Excel or CSV for the most reliable reading. Repeated uploads are safe – the same entry is never added twice.</div></div>
+   <div id="stmtProg" class="muted" style="margin-top:6px">${esc(S.stmtMsg||'')}</div></div>
+   <div class="card"><div class="billhead"><h3>${esc(S.month)} · ${tx.length} entries</h3><div class="row"><span class="pill p-n">Out ₹${fmt(out)}</span><span class="pill p-n">In ₹${fmt(inn)}</span>${lastBal!=null?`<span class="pill p-info">Closing bal ₹${fmt(lastBal)}</span>`:''}</div></div>${tx.length?statusBar:''}</div>
+   ${tx.length?insight:''}
+   <div class="card"><div class="billhead"><div class="row">${[['todo','To do'],['ready','Ready'],['sent','Sent'],['done','Done'],['ignored','Ignored'],['all','All']].map(([k,l])=>`<button class="small ${S.txFilter===k?'primary':''}" data-act="txFilter" data-f="${k}">${l}</button>`).join('')}</div>
+   <div class="row"><button class="small" data-act="txOkAll">OK all with a ledger</button><button class="small primary" data-act="txExport" ${all.some(t=>t.status==='ready')?'':'disabled'}>Make Tally file (${all.filter(t=>t.status==='ready').length})</button></div></div>
+   ${shown.length?`<div class="tw" style="margin-top:8px"><table><tr><th>Date</th><th>Narration</th><th class="n">Out</th><th class="n">In</th><th>Ledger in Tally</th><th>Status</th><th></th></tr>${rows}</table></div>`:'<p class="muted">Nothing here.</p>'}
+   <p class="muted">If Tally already has these entries (typed by your accountant), don't post them again – use Reconcile below.</p></div>
+   <div class="card"><h3>Reconcile with Tally</h3><p class="muted">Compares this statement with the bank ledger in Tally – shows what is missing on either side.</p>
+   <div class="row"><button data-act="reqBook">Ask Tally for bank book (${esc(S.month)})</button><button data-act="loadBook">Load Tally bank book (CSV/Excel)</button></div>${recon}</div>`;
+}
+function miniTableHTML(rows,heads){ return `<div class="tw"><table><tr>${heads.map(h=>`<th>${esc(h)}</th>`).join('')}</tr>${rows.map(r=>`<tr>${r.map(x=>`<td>${x}</td>`).join('')}</tr>`).join('')}</table></div>`; }
+async function readStatementFile(f){
+  const prog=m=>{ const el=$('#stmtProg'); if(el) el.textContent=m; };
+  const c=co(); let txns=[], note='';
+  if(/\.(csv|txt|xlsx|xls)$/i.test(f.name)){
+    if(!window.XLSX) throw new Error('Spreadsheet reader did not load – check internet');
+    const wb=/\.(csv|txt)$/i.test(f.name)?XLSX.read(await f.text(),{type:'string',raw:true}):XLSX.read(await f.arrayBuffer(),{type:'array',cellDates:true});
+    for(const sn of wb.SheetNames){ const rows=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,raw:true,defval:''}); const map=detectCols(rows); if(map){ txns=rowsToTxns(rows,map); break; } }
+    if(!txns.length) throw new Error('Could not find Date / Narration / Withdrawal / Deposit columns');
+  } else {
+    if(!Store.ai||!Store.aiImages) throw new Error('PDF/photo reading needs the online app – use the Excel/CSV statement');
+    let pages=[];
+    if(/pdf$/i.test(f.type)||/\.pdf$/i.test(f.name)){ const pdf=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise; const n=Math.min(pdf.numPages,30); if(pdf.numPages>30) note=' (first 30 pages only)';
+      for(let p=1;p<=n;p++){ prog(`Preparing page ${p}/${n}…`); const pg=await pdf.getPage(p); const vp=pg.getViewport({scale:2}); const cv=document.createElement('canvas'); cv.width=vp.width; cv.height=vp.height; await pg.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise; pages.push(await new Promise(r=>cv.toBlob(r,'image/jpeg',0.85))); } }
+    else pages=await fileToImages(f);
+    for(let i=0;i<pages.length;i+=2){ prog(`AI reading pages ${i+1}-${Math.min(i+2,pages.length)} of ${pages.length}…`);
+      const res=await Store.ai(`Extract every transaction row from these bank/card/loan statement page(s) for "${c.name}". Reply with ONLY JSON:
+{"accountLast4":"","txns":[{"date":"YYYY-MM-DD","narration":"","ref":"","withdrawal":0,"deposit":0,"balance":0}]}
+Rules: Indian dates are day-month-year. Copy the narration exactly. Amounts are plain numbers. Skip opening balance, closing balance, totals and page headers. Keep the statement order. If balance is missing use null.`,{images:pages.slice(i,i+2),modelTier:'default'});
+      const t=res.text||''; const j=JSON.parse(t.slice(t.indexOf('{'),t.lastIndexOf('}')+1));
+      const acc=String(j.accountLast4||''); const b=(c.banks||[]).find(x=>x.ledger===S.bankSel); if(acc&&b&&b.last4&&!acc.endsWith(b.last4)) note+=` · ⚠ statement shows account …${acc}, selected …${b.last4}`;
+      (j.txns||[]).forEach(x=>{ const date=parseDateIN(x.date); if(date) txns.push({date,narr:String(x.narration||'').trim(),ref:String(x.ref||''),dr:r2(Math.abs(num(x.withdrawal))),cr:r2(Math.abs(num(x.deposit))),bal:x.balance==null||x.balance===''?null:r2(num(x.balance))}); }); }
+  }
+  return {txns:txns.filter(t=>t.dr||t.cr),note};
+}
+async function importStatement(f){
+  const c=co(); const prog=m=>{ S.stmtMsg=m; const el=$('#stmtProg'); if(el) el.textContent=m; };
+  try{
+    prog('Reading '+f.name+'…'); const {txns,note}=await readStatementFile(f);
+    const breaks=new Set(balanceBreaks(txns));
+    const existing=allTx(S.bankSel); const seen=new Set(existing.map(t=>t.h));
+    const ctx={co:c,bank:S.bankSel,banks:c.banks||[],bills:S.bills,ledgers:S.ledgers,usedBills:new Set(existing.filter(t=>t.billId).map(t=>t.billId))};
+    let added=0,dup=0; const months=new Set(); let seq=Date.now();
+    txns.forEach((t,i)=>{ const h=txnHash(t); if(seen.has(h)){dup++; return;} seen.add(h);
+      const cl=classifyTxn(t,ctx); existing.push({...t,...cl,h,id:hashId(h),seq:seq++,status:'new',flag:breaks.has(i)?'Balance does not follow from the previous line – check amount':''}); months.add(t.date.slice(0,7)); added++; });
+    await saveMonths(S.bankSel,[...months],existing);
+    const first=[...months].sort()[0]; if(first&&!months.has(S.month)) S.month=first;
+    prog(`${added} new entries, ${dup} already there${breaks.size?`, ${breaks.size} balance mismatch(es) flagged`:''}${note}`);
+    await logIt(`Bank statement ${f.name} → ${S.bankSel}: ${added} new`); render();
+  }catch(e){ prog('✖ '+(e.code==='rate_limited'?'AI busy – try again in a minute':e.message||e)); }
+}
+
+// ---------- Accounts tab ----------
+const ADJ_T=[
+ {k:'dep',s:'Depreciation',l:'Depreciation for the quarter',dr:'Depreciation',cr:'(fixed-asset ledger or Accumulated Depreciation)'},
+ {k:'audit',s:'Audit fee',l:'Audit fees payable',dr:'Audit Fees',cr:'Audit Fees Payable',tds:true},
+ {k:'exp',s:'Expenses',l:'Expenses payable (power, rent, professional…)',dr:'(expense ledger)',cr:'Expenses Payable',tds:true},
+ {k:'sal',s:'Salary',l:'Salary & wages payable',dr:'Salary',cr:'Salary Payable'},
+ {k:'intl',s:'Loan interest',l:'Interest accrued on loans',dr:'Interest on Loan',cr:'Interest Accrued & Due'},
+ {k:'intd',s:'FD interest',l:'Interest accrued on deposits (income)',dr:'Interest Accrued on FD',cr:'Interest Received'},
+ {k:'pre',s:'Prepaid',l:'Prepaid expenses',dr:'Prepaid Expenses',cr:'(expense ledger)'},
+ {k:'tax',s:'Income tax',l:'Provision for income tax',dr:'Provision for Income Tax (P&L)',cr:'Provision for Tax'},
+ {k:'other',l:'Other journal',dr:'',cr:''}];
+function lastQEnd(){ const d=new Date(); const m=d.getMonth()+1; const qm=[3,6,9,12].filter(x=>x<m).pop(); return qm?isoDate(new Date(d.getFullYear(),qm,0)):isoDate(new Date(d.getFullYear()-1,12,0)); }
+function snapFS(tb,withAdj){ const adjs=withAdj?S.adjs.filter(j=>['pending','sent'].includes(j.status)&&j.date<=tb.to&&j.date>=fyStart(tb.to)):[]; return buildFS(tb,{adjs,closingStock:tb.id===S.tbSel&&S.closeStockOv!==''?+S.closeStockOv:undefined}); }
+function prevSnap(tb){ return S.tbs.filter(x=>x.to<tb.to&&fyStart(x.to)===fyStart(tb.to)).sort((a,b)=>b.to.localeCompare(a.to))[0]||null; }
+function snapAt(to){ return S.tbs.find(x=>x.to===to)||null; }
+function qPL(tb){ if(!tb) return null; const ytd=snapFS(tb,S.inclAdj&&tb.id===S.tbSel).pl; const p=prevSnap(tb); return p?plMinus(ytd,snapFS(p,false).pl):ytd; }
+function vAccounts(c){
+  const tb=S.tbs.find(x=>x.id===S.tbSel)||S.tbs[0]; if(tb) S.tbSel=tb.id;
+  const pend=S.adjs.filter(j=>j.status==='pending'), sent=S.adjs.filter(j=>j.status==='sent');
+  const head=`<div class="card"><div class="billhead"><h2>Accounts – ${esc(c.short||c.name)}</h2><div class="row">
+   ${S.tbs.length?`<label class="row" style="gap:6px"><span class="muted">Figures up to</span><select id="tbSel">${S.tbs.map(x=>`<option value="${x.id}" ${x.id===S.tbSel?'selected':''}>${esc(x.to)} (${x.source||'Tally'})</option>`).join('')}</select></label>`:''}</div></div>
+   <div class="row" style="margin-top:10px"><label class="f">Quarter / period end<input type="date" id="tbTo" value="${lastQEnd()}"></label><button data-act="reqTB">Ask Tally for trial balance</button><button data-act="loadTB">Load trial balance file</button>${tb?`<button class="small danger" data-act="tbDel">Remove this period</button>`:''}</div>
+   <ul class="tight muted"><li>Figures come from Tally (financial year start → period end). Quarter = this period minus the previous period loaded.</li><li>Load each quarter end once (Jun, Sep, Dec, Mar) to get quarter-wise and year-on-year comparisons.</li><li>These are <b>provisional management accounts</b> – final statutory accounts need your auditor.</li></ul></div>`;
+  const subs=[['pl','Profit & Loss'],['bs','Balance Sheet'],['cf','Cash Flow'],['tb','Trial Balance'],['prov',`Quarter-end provisions${pend.length?` (${pend.length})`:''}`]];
+  const nav=`<div class="row" style="margin-bottom:12px">${subs.map(([k,l])=>`<button class="${S.acctSub===k?'primary':''}" data-act="acctSub" data-s="${k}">${l}</button>`).join('')}</div>`;
+  if(S.acctSub==='prov') return head+nav+vProv(c,tb);
+  if(!tb) return head+nav+`<div class="card"><p>No trial balance loaded yet. Click <b>Ask Tally for trial balance</b> – the bridge on the Tally PC saves a file in Downloads (<b>tallyout_…_tb_….csv</b>). Then click <b>Load trial balance file</b>.</p><p class="muted">No bridge? Use the template: columns <b>Name, Primary group, Sub group, Debit, Credit</b> (closing balances), with group names as in Tally. <button class="small" data-act="tbTemplate">Download template</button></p></div>`;
+  const fs=snapFS(tb,S.inclAdj);
+  const ctl=`<div class="card row"><label class="row" style="gap:6px"><input type="checkbox" id="inclAdj" ${S.inclAdj?'checked':''}> Include provisions not yet posted in Tally (${S.adjs.filter(j=>['pending','sent'].includes(j.status)).length})</label>
+   <label class="row" style="gap:6px"><span class="muted">Closing stock override ₹</span><input id="csOv" value="${esc(S.closeStockOv)}" placeholder="${fmt(buildFS(tb,{}).pl.closeStock)}" inputmode="decimal" style="width:150px"></label>
+   <div class="grow"></div><button data-act="fsReport">Download report (HTML)</button><button data-act="fsCsv">Download CSV</button></div>
+   ${fs.missing.length?`<div class="chk bad">✖ Provision ledgers not found in this trial balance: ${esc(fs.missing.join(', '))} – those amounts are left out</div>`:''}
+   ${fs.unmapped.length?`<div class="chk warn">⚠ Ledgers under groups the app doesn't recognise (kept under “Other”): ${esc(fs.unmapped.slice(0,8).join(', '))}${fs.unmapped.length>8?'…':''}</div>`:''}`;
+  if(S.acctSub==='tb') return head+nav+ctl+vTB(fs,tb);
+  if(S.acctSub==='bs') return head+nav+ctl+vBS(fs,tb);
+  if(S.acctSub==='cf') return head+nav+ctl+vCF(tb);
+  return head+nav+ctl+vPL(tb);
+}
+function pct(a,b){ if(!b) return '—'; const v=(a-b)/Math.abs(b)*100; return `<span style="color:${v>=0?'var(--ok)':'var(--bad)'}">${v>=0?'▲':'▼'} ${Math.abs(v).toFixed(1)}%</span>`; }
+function vPL(tb){
+  const q=qPL(tb); const p=prevSnap(tb); const pq=p?qPL(p):null;
+  const ly=snapAt(String(+tb.to.slice(0,4)-1)+tb.to.slice(4)); const lyq=ly?qPL(ly):null;
+  const ytd=snapFS(tb,S.inclAdj).pl; const isYtdOnly=!p;
+  const L=[['sales','Revenue from sales'],['dinc','Direct income'],['openStock','Opening stock'],['purch','Purchases'],['dexp','Direct expenses'],['closeStock','Closing stock'],['gp','Gross profit',1],['iinc','Other income'],['iexp','Indirect expenses (admin, salary, interest, depreciation…)'],['np','Net profit (as per Tally)',1]];
+  const col=o=>k=>o?fmt(o[k]):'—';
+  const rows=L.filter(([k])=>['gp','np','sales','purch'].includes(k)||[q,ytd].some(o=>o&&Math.abs(o[k])>0.004)).map(([k,l,b])=>`<tr${b?' style="background:var(--accent)"':''}><td>${b?'<b>':''}${l}${b?'</b>':''}</td><td class="n"><b>${col(q)(k)}</b></td><td class="n">${col(pq)(k)}</td><td class="n">${pq?pct(q[k],pq[k]):'—'}</td><td class="n">${col(lyq)(k)}</td><td class="n">${lyq?pct(q[k],lyq[k]):'—'}</td><td class="n">${col(ytd)(k)}</td></tr>`).join('');
+  const gpM=q.sales?q.gp/q.sales*100:0, npM=q.sales?q.np/q.sales*100:0;
+  const cogs=r2(q.openStock+q.purch+q.dexp-q.closeStock);
+  const bars=[['Revenue',q.sales+q.dinc,'#FFB86E'],['Cost of goods',-cogs,'#E7A49B'],['Gross profit',q.gp,'#9FD5AE'],['Other income',q.iinc,'#A9C3EE'],['Overheads',-q.iexp,'#E7A49B'],['Net profit',q.np,q.np>=0?'#0B6B2E':'#9B1C1C']];
+  const mx=Math.max(1,...bars.map(b=>Math.abs(b[1])));
+  const svg=`<svg viewBox="0 0 760 ${bars.length*34+6}" width="100%">${bars.map((b,i)=>{const w=Math.max(2,470*Math.abs(b[1])/mx); return `<text x="0" y="${24+i*34}" font-size="14" fill="#141414">${b[0]}</text><rect x="130" y="${8+i*34}" width="${w}" height="24" rx="5" fill="${b[2]}" stroke="#C2560C"/><text x="${138+w}" y="${25+i*34}" font-size="13" fill="#141414">${b[1]<0?'−':''}₹${fmt(Math.abs(b[1]))}</text>`;}).join('')}</svg>`;
+  return `<div class="card"><h3>${isYtdOnly?'Year to date':'Quarter'} ending ${esc(tb.to)} – where the money went</h3>${svg}
+   <div class="grid3" style="margin-top:8px"><div class="kpi"><b>₹${fmt(q.sales+q.dinc)}</b><span>Revenue</span></div><div class="kpi"><b>${gpM.toFixed(1)}%</b><span>Gross margin</span></div><div class="kpi" style="${q.np<0?'background:var(--badbg)':'background:var(--okbg)'}"><b>₹${fmt(q.np)}</b><span>Net profit · ${npM.toFixed(1)}%</span></div></div></div>
+   <div class="card"><h3>Profit &amp; Loss (₹)</h3>${isYtdOnly?'<p class="muted">Only one period loaded – showing year-to-date. Load the previous quarter end to get the quarter alone.</p>':''}<div class="tw"><table><tr><th></th><th class="n">${isYtdOnly?'YTD':'This quarter'}</th><th class="n">Prev quarter</th><th class="n">QoQ</th><th class="n">Same qtr last yr</th><th class="n">YoY</th><th class="n">Year to date</th></tr>${rows}</table></div>
+   <p class="muted">Before tax unless a tax provision is booked in Tally. Opening stock for a quarter = previous quarter's closing stock.</p></div>`;
+}
+function vBS(fs,tb){
+  const L=[['shareCapital','Share capital'],['reserves','Reserves & surplus (incl. profit to date)'],['borrowings','Borrowings (split long/short term with auditor)'],['tradePayables','Trade payables'],['dutiesTaxes','Duties & taxes (GST, TDS payable)'],['provisions','Provisions'],['otherCL','Other current liabilities'],['suspense','Suspense'],['otherUnmapped','Other (unmapped)']];
+  const A=[['ppe','Property, plant & equipment'],['investments','Investments'],['inventories','Inventories (closing stock)'],['tradeReceivables','Trade receivables'],['cashBank','Cash & bank'],['loansAdvances','Loans & advances'],['deposits','Deposits'],['otherCA','Other current assets'],['misc','Misc. expenses (asset)'],['branch','Branch / divisions'],['otherUnmapped','Other (unmapped)']];
+  const tr=(o,list)=>list.filter(([k])=>o[k]!==undefined&&Math.abs(o[k])>0.004).map(([k,l])=>`<tr><td>${l}</td><td class="n">${fmt(o[k])}</td></tr>`).join('');
+  const stack=(o,list,x,label,tot)=>{ let y=24; const cols=['#FFB86E','#FFCF9E','#A9C3EE','#9FD5AE','#E8C96A','#E7A49B','#C9B8F0','#B6E3F0','#DDD','#F5D0A9','#CCC']; return `<text x="${x}" y="16" font-size="14" fill="#141414">${label}</text>`+list.filter(([k])=>o[k]>0).map(([k,l],i)=>{ const h=Math.max(2,300*o[k]/Math.max(1,tot)); const g=`<rect x="${x}" y="${y}" width="120" height="${h}" fill="${cols[i%cols.length]}" stroke="#C2560C"/>${h>16?`<text x="${x+128}" y="${y+h/2+5}" font-size="12" fill="#141414">${l.split(' (')[0]} ${(o[k]/tot*100).toFixed(0)}%</text>`:''}`; y+=h; return g; }).join(''); };
+  return `<div class="card"><h3>Balance sheet as on ${esc(tb.to)} – what the company owns vs owes</h3><svg viewBox="0 0 760 340" width="100%">${stack(fs.L,L,10,'Equity & liabilities',fs.totL)}${stack(fs.A,A,400,'Assets',fs.totA)}</svg>
+   ${Math.abs(fs.diff)>1?`<div class="chk bad">✖ Difference ₹${fmt(fs.diff)} – usually an opening-balance difference in Tally or unmapped groups</div>`:'<div class="chk ok">✔ Assets = Equity + liabilities</div>'}</div>
+   <div class="grid2"><div class="card"><h3>Equity &amp; liabilities</h3><table>${tr(fs.L,L)}<tr><th>Total</th><th class="n">${fmt(fs.totL)}</th></tr></table></div>
+   <div class="card"><h3>Assets</h3><table>${tr(fs.A,A)}<tr><th>Total</th><th class="n">${fmt(fs.totA)}</th></tr></table></div></div>
+   <p class="muted">Draft in Schedule III style from Tally groups. Current/non-current split, deferred tax and notes need your auditor.</p>`;
+}
+function vTB(fs,tb){
+  const groups={}; fs.rows.forEach(r=>{ if(Math.abs(r.net)<0.005&&!r.adj) return; (groups[r.primary||'(no group)']=groups[r.primary||'(no group)']||[]).push(r); });
+  const order=Object.values(PG);
+  const keys=Object.keys(groups).sort((a,b)=>(order.indexOf(a)+1||99)-(order.indexOf(b)+1||99));
+  const mx=Math.max(fs.tbDr,fs.tbCr,1);
+  return `<div class="card"><h3>Trial balance as on ${esc(tb.to)}</h3><svg viewBox="0 0 760 80" width="100%"><text x="0" y="24" font-size="14" fill="#141414">Debit</text><rect x="70" y="8" width="${600*fs.tbDr/mx}" height="24" rx="5" fill="#FFB86E" stroke="#C2560C"/><text x="0" y="62" font-size="14" fill="#141414">Credit</text><rect x="70" y="46" width="${600*fs.tbCr/mx}" height="24" rx="5" fill="#A9C3EE" stroke="#123C73"/></svg>
+   ${Math.abs(fs.tbDiff)>1?`<div class="chk bad">✖ Debit and credit differ by ₹${fmt(fs.tbDiff)} – check “Difference in opening balances” in Tally</div>`:'<div class="chk ok">✔ Debit = Credit</div>'}
+   <div class="tw" style="margin-top:8px"><table><tr><th>Ledger</th><th>Sub group</th><th class="n">Debit</th><th class="n">Credit</th>${S.inclAdj?'<th class="n">of which provisions</th>':''}</tr>
+   ${keys.map(k=>{ const g=groups[k]; const d=g.reduce((s,r)=>s+(r.net>0?r.net:0),0), cr=g.reduce((s,r)=>s+(r.net<0?-r.net:0),0); return `<tr style="background:var(--accent)"><td colspan="2"><b>${esc(k)}</b></td><td class="n"><b>${d?fmt(d):''}</b></td><td class="n"><b>${cr?fmt(cr):''}</b></td>${S.inclAdj?'<td></td>':''}</tr>`+g.sort((a,b)=>a.name.localeCompare(b.name)).map(r=>`<tr><td>${esc(r.name)}</td><td class="muted">${esc(r.sub||'')}</td><td class="n">${r.net>0?fmt(r.net):''}</td><td class="n">${r.net<0?fmt(-r.net):''}</td>${S.inclAdj?`<td class="n">${r.adj?fmt(r.adj):''}</td>`:''}</tr>`).join(''); }).join('')}
+   ${fs.pl.openStock?`<tr><td>Opening stock</td><td></td><td class="n">${fmt(fs.pl.openStock)}</td><td></td>${S.inclAdj?'<td></td>':''}</tr>`:''}
+   <tr><th colspan="2">Total</th><th class="n">${fmt(fs.tbDr)}</th><th class="n">${fmt(fs.tbCr)}</th>${S.inclAdj?'<th></th>':''}</tr></table></div></div>`;
+}
+function vProv(c,tb){
+  const names=[...new Set([...(tb?tb.rows.filter(r=>r.type!=='STOCK').map(r=>r.name):[]),...S.ledgers])];
+  const dl=`<datalist id="ledList4">${names.slice(0,5000).map(l=>`<option value="${esc(l)}">`).join('')}</datalist>`;
+  const list=S.adjs; const tot=list.filter(j=>j.status==='pending').reduce((s,j)=>s+(+j.amount||0),0);
+  const icons={dep:'🏭',audit:'🧾',exp:'💡',sal:'👷',intl:'🏦',intd:'💰',pre:'📅',tax:'🏛',other:'✏️'};
+  const cards=`<svg viewBox="0 0 760 92" width="100%">${ADJ_T.slice(0,8).map((t,i)=>{const n=list.filter(j=>j.kind===t.k&&j.status!=='posted').length; return `<g data-act="adjPick" data-k="${t.k}" style="cursor:pointer"><rect x="${i*95}" y="4" width="88" height="82" rx="10" fill="${n?'#FFCF9E':'#FFE2C2'}" stroke="#C2560C" stroke-width="2"/><text x="${i*95+44}" y="36" font-size="24" text-anchor="middle">${icons[t.k]}</text><text x="${i*95+44}" y="60" font-size="10" text-anchor="middle" fill="#141414">${esc(t.s)}</text><text x="${i*95+44}" y="76" font-size="11" text-anchor="middle" fill="#141414">${n?n+' open':''}</text></g>`;}).join('')}</svg>`;
+  return dl+`<div class="card"><h3>Quarter-end provisions</h3><p class="muted">Entries that never come through bills or the bank but are needed for true quarter figures. Tap a type to start.</p>${cards}
+   <div class="grid3" style="margin-top:10px"><label class="f">Type<select id="adjKind">${ADJ_T.map(t=>`<option value="${t.k}">${esc(t.l)}</option>`).join('')}</select></label>
+   <label class="f">Date<input type="date" id="adjDate" value="${tb?tb.to:lastQEnd()}"></label><label class="f">Amount ₹<input id="adjAmt" inputmode="decimal"></label>
+   <label class="f">Debit ledger<input id="adjDr" list="ledList4" placeholder="${esc(ADJ_T[0].dr)}"></label><label class="f">Credit ledger<input id="adjCr" list="ledList4" placeholder="${esc(ADJ_T[0].cr)}"></label><label class="f">Narration<input id="adjNar"></label></div>
+   <div id="adjTip" class="chk info" style="display:none">For expenses payable to a party (audit fee, rent, professional fees), TDS applies when you credit the party – credit the party's ledger and deduct TDS, or deduct it when you pay.</div>
+   <div class="row" style="margin-top:8px"><button class="primary" data-act="adjAdd">Add provision</button></div></div>
+   <div class="card"><div class="billhead"><h3>Provisions – ₹${fmt(tot)} not yet sent to Tally</h3><button class="primary" data-act="adjExport" ${list.some(j=>j.status==='pending')?'':'disabled'}>Make Tally journal file</button></div>
+   ${list.length?miniTableHTML(list.map(j=>[esc(j.date),esc((ADJ_T.find(t=>t.k===j.kind)||{}).l||j.kind),esc(j.drLedger),esc(j.crLedger),fmt(j.amount),{pending:'<span class="pill p-warn">Not sent</span>',sent:'<span class="pill p-n">Sent</span>',posted:'<span class="pill p-ok">Posted</span>'}[j.status],j.status==='sent'?`<button class="small primary" data-act="adjPosted" data-id="${j.id}">Posted ✔</button>`:j.status==='pending'?`<button class="small danger" data-act="adjDel" data-id="${j.id}">Delete</button>`:'']),['Date','Type','Dr','Cr','Amount','Status','']):'<p class="muted">None yet.</p>'}</div>`;
+}
+function cfFor(tb){ const cur=snapFS(tb,S.inclAdj); const p=prevSnap(tb); return {ytd:cashFlow(cur,null),q:p?cashFlow(cur,snapFS(p,false)):null,p}; }
+function vCF(tb){
+  const {ytd,q,p}=cfFor(tb); const m=q||ytd;
+  const steps=[['Opening cash & bank',m.cashOpen,'#A9C3EE'],['Operating',m.op,null],['Investing',m.inv,null],['Financing',m.fin,null],['Closing cash & bank',m.cashClose,'#A9C3EE']];
+  const vals=[m.cashOpen,m.cashOpen+m.op,m.cashOpen+m.op+m.inv,m.cashOpen+m.op+m.inv+m.fin,m.cashClose,0];
+  const lo=Math.min(...vals), hi=Math.max(...vals,1), H=200, y=v=>20+H*(hi-v)/Math.max(1,hi-lo);
+  let run=m.cashOpen; const bars=steps.map((st,i)=>{ let top,bot,col=st[2];
+    if(i===0||i===4){ top=Math.max(st[1],0); bot=Math.min(st[1],0); } else { top=Math.max(run,run+st[1]); bot=Math.min(run,run+st[1]); col=st[1]>=0?'#9FD5AE':'#E7A49B'; run+=st[1]; }
+    const x=20+i*148; return `<rect x="${x}" y="${y(top)}" width="110" height="${Math.max(2,y(bot)-y(top))}" rx="6" fill="${col}" stroke="#C2560C"/><text x="${x+55}" y="${y(top)-6}" font-size="13" text-anchor="middle" fill="#141414">${st[1]<0?'−':''}₹${fmt(Math.abs(st[1]))}</text><text x="${x+55}" y="${H+50}" font-size="12.5" text-anchor="middle" fill="#141414">${st[0]}</text>`; }).join('');
+  const zero=lo<0?`<line x1="10" x2="750" y1="${y(0)}" y2="${y(0)}" stroke="#3A2A1A" stroke-dasharray="4 3"/>`:'';
+  const sec=(k,title,tq,ty)=>{ const labels=[...new Set([...(q?q.L[k]:[]),...ytd.L[k]].map(l=>l[0]))];
+    return `<tr style="background:var(--accent)"><td colspan="${q?3:2}"><b>${title}</b></td></tr>`+labels.map(l=>{ const a=q?(q.L[k].find(x=>x[0]===l)||[0,0])[1]:null, b=(ytd.L[k].find(x=>x[0]===l)||[0,0])[1]; return `<tr><td>${esc(l)}</td>${q?`<td class="n">${fmt(a)}</td>`:''}<td class="n">${fmt(b)}</td></tr>`; }).join('')+`<tr><th>Net cash from ${title.toLowerCase().replace(/^[a-z]\. /,'')}</th>${q?`<th class="n">${fmt(tq)}</th>`:''}<th class="n">${fmt(ty)}</th></tr>`; };
+  return `<div class="card"><h3>${q?'Quarter':'Year to date'} ending ${esc(tb.to)} – where the cash came from and went</h3><svg viewBox="0 0 760 ${H+64}" width="100%">${zero}${bars}</svg>
+   <div class="grid3" style="margin-top:8px"><div class="kpi" style="background:${m.op>=0?'var(--okbg)':'var(--badbg)'}"><b>₹${fmt(m.op)}</b><span>Cash from operations</span></div><div class="kpi"><b>₹${fmt(m.inv)}</b><span>Investing (capex, investments)</span></div><div class="kpi"><b>₹${fmt(m.fin)}</b><span>Financing (loans, capital, interest)</span></div></div>
+   ${Math.abs(m.diff)>1?`<div class="chk bad">✖ Cash flow differs from the actual change in cash & bank by ₹${fmt(m.diff)} – usually an opening-balance difference in Tally or ledgers under unusual groups</div>`:'<div class="chk ok">✔ Net cash flow = actual change in cash &amp; bank balances</div>'}</div>
+   <div class="card"><h3>Cash flow statement (indirect method, ₹)</h3>${q?'':'<p class="muted">Only one period loaded – showing year to date. Load the previous quarter end to get the quarter alone.</p>'}
+   <div class="tw"><table><tr><th></th>${q?'<th class="n">This quarter</th>':''}<th class="n">Year to date</th></tr>
+   ${sec('op','A. Operating activities',q&&q.op,ytd.op)}${sec('inv','B. Investing activities',q&&q.inv,ytd.inv)}${sec('fin','C. Financing activities',q&&q.fin,ytd.fin)}
+   <tr style="background:var(--accent2)"><th>Net increase/(decrease) in cash (A+B+C)</th>${q?`<th class="n">${fmt(q.net)}</th>`:''}<th class="n">${fmt(ytd.net)}</th></tr>
+   <tr><td>Opening cash &amp; bank</td>${q?`<td class="n">${fmt(q.cashOpen)}</td>`:''}<td class="n">${fmt(ytd.cashOpen)}</td></tr><tr><td><b>Closing cash &amp; bank</b></td>${q?`<td class="n"><b>${fmt(q.cashClose)}</b></td>`:''}<td class="n"><b>${fmt(ytd.cashClose)}</b></td></tr></table></div>
+   <ul class="tight muted"><li>Depreciation, finance cost, interest and tax are picked up by ledger name (e.g. “Depreciation”, “Interest on Loan”, “Advance Tax”) – keep those words in the ledger names.</li><li>Bank overdraft is treated as part of cash. Draft for management use – your auditor finalises the statutory cash flow.</li></ul></div>`;
+}
+function fsReportHTML(c,tb){
+  const fs=snapFS(tb,S.inclAdj), q=qPL(tb), ytd=fs.pl;
+  const row=(l,a,b)=>`<tr><td>${l}</td><td class="n">${a==null?'':fmt(a)}</td><td class="n">${b==null?'':fmt(b)}</td></tr>`;
+  const css=`body{font-family:Arial,sans-serif;background:#FFF6EC;color:#141414;font-weight:600;margin:24px}h1,h2{margin:6px 0}table{border-collapse:collapse;width:100%;margin:8px 0 18px}td,th{border-bottom:1px solid #F2B880;padding:5px 7px;text-align:left}th{background:#FFE2C2}.n{text-align:right}.note{font-size:12px;color:#3A2A1A}`;
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(c.name)} – accounts to ${esc(tb.to)}</title><style>${css}</style></head><body>
+  <h1>${esc(c.name)}</h1><div class="note">Provisional management accounts · period ${esc(fyStart(tb.to))} to ${esc(tb.to)} · prepared ${isoDate(new Date())} from Tally${S.inclAdj?' incl. provisions not yet posted':''} · unaudited</div>
+  <h2>Profit &amp; Loss (₹)</h2><table><tr><th></th><th class="n">${prevSnap(tb)?'Quarter':'YTD'}</th><th class="n">Year to date</th></tr>
+  ${row('Revenue from sales',q.sales,ytd.sales)}${row('Direct income',q.dinc,ytd.dinc)}${row('Opening stock',q.openStock,ytd.openStock)}${row('Purchases',q.purch,ytd.purch)}${row('Direct expenses',q.dexp,ytd.dexp)}${row('Closing stock',q.closeStock,ytd.closeStock)}${row('<b>Gross profit</b>',q.gp,ytd.gp)}${row('Other income',q.iinc,ytd.iinc)}${row('Indirect expenses',q.iexp,ytd.iexp)}${row('<b>Net profit (as per Tally)</b>',q.np,ytd.np)}</table>
+  <h2>Balance sheet as on ${esc(tb.to)} (₹)</h2><table><tr><th>Equity &amp; liabilities</th><th class="n"></th><th></th></tr>${Object.entries(fs.L).filter(([k,v])=>Math.abs(v)>0.004).map(([k,v])=>row(k.replace(/([A-Z])/g,' $1').replace(/^./,x=>x.toUpperCase()),v,null)).join('')}${row('<b>Total</b>',fs.totL,null)}
+  <tr><th>Assets</th><th></th><th></th></tr>${Object.entries(fs.A).filter(([k,v])=>Math.abs(v)>0.004).map(([k,v])=>row(k.replace(/([A-Z])/g,' $1').replace(/^./,x=>x.toUpperCase()),v,null)).join('')}${row('<b>Total</b>',fs.totA,null)}</table>
+  ${(()=>{ const {ytd:cf,q:cq}=cfFor(tb); const rr=(k)=>{ const labs=[...new Set([...(cq?cq.L[k]:[]),...cf.L[k]].map(l=>l[0]))]; return labs.map(l=>row(esc(l),cq?(cq.L[k].find(x=>x[0]===l)||[0,0])[1]:null,(cf.L[k].find(x=>x[0]===l)||[0,0])[1])).join(''); };
+   return `<h2>Cash flow statement – indirect method (₹)</h2><table><tr><th></th><th class="n">${cq?'Quarter':''}</th><th class="n">Year to date</th></tr><tr><th colspan="3">A. Operating activities</th></tr>${rr('op')}${row('<b>Net cash from operating activities</b>',cq&&cq.op,cf.op)}<tr><th colspan="3">B. Investing activities</th></tr>${rr('inv')}${row('<b>Net cash from investing activities</b>',cq&&cq.inv,cf.inv)}<tr><th colspan="3">C. Financing activities</th></tr>${rr('fin')}${row('<b>Net cash from financing activities</b>',cq&&cq.fin,cf.fin)}${row('<b>Net increase/(decrease) in cash</b>',cq&&cq.net,cf.net)}${row('Opening cash &amp; bank',cq&&cq.cashOpen,cf.cashOpen)}${row('<b>Closing cash &amp; bank</b>',cq&&cq.cashClose,cf.cashClose)}</table>`; })()}
+  <h2>Trial balance as on ${esc(tb.to)} (₹)</h2><table><tr><th>Ledger</th><th>Group</th><th class="n">Debit</th><th class="n">Credit</th></tr>${fs.rows.filter(r=>Math.abs(r.net)>0.004).map(r=>`<tr><td>${esc(r.name)}</td><td>${esc(r.primary)}</td><td class="n">${r.net>0?fmt(r.net):''}</td><td class="n">${r.net<0?fmt(-r.net):''}</td></tr>`).join('')}<tr><th colspan="2">Total</th><th class="n">${fmt(fs.tbDr)}</th><th class="n">${fmt(fs.tbCr)}</th></tr></table>
+  <div class="note">Draft for management review. Statutory financial statements, tax provisions and Schedule III classification to be finalised by the auditor.</div></body></html>`;
+}
+function reqFile(kind,payload){ const c=co(); const stamp=new Date().toISOString().replace(/[-:T]/g,'').slice(0,14); const code=(c.code||c.short||'CO').replace(/[^A-Za-z0-9]/g,''); return saveFile(`tallyreq_${code}_${stamp}.txt`,JSON.stringify({type:kind,company:c.tallyName||c.name,code,...payload}),'Tally request'); }
+
+// ---------- events ----------
+const hiddenIn=(id,accept,fn)=>{ const i=document.createElement('input'); i.type='file'; i.id=id; i.accept=accept; i.hidden=true; i.onchange=async e=>{ const f=e.target.files[0]; e.target.value=''; if(f) await fn(f); }; document.body.appendChild(i); return i; };
+hiddenIn('stmtIn','.csv,.txt,.xlsx,.xls,.pdf,image/*',importStatement);
+hiddenIn('bookIn','.csv,.txt,.xlsx,.xls',async f=>{ try{ let rows; if(/\.(xlsx|xls)$/i.test(f.name)){ const wb=XLSX.read(await f.arrayBuffer(),{type:'array',cellDates:true}); rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:true,defval:''}); } else rows=(await f.text()).replace(/^﻿/,'').split(/\r?\n/).filter(l=>!/^#KAD/.test(l)).map(splitCsv);
+  const map=detectCols(rows); if(!map) throw new Error('Need Date, Particulars, Debit, Credit columns'); S.books=rowsToTxns(rows,map).map(b=>({date:b.date,narr:b.narr,dr:b.dr,cr:b.cr})); toast(`${S.books.length} Tally entries loaded`); render(); }catch(e){ toast(e.message||'Could not read file'); } });
+hiddenIn('tbIn','.csv,.txt',async f=>{ try{ const c=co(); const {meta,rows}=parseTBcsv(await f.text()); if(!rows.length) throw new Error('No ledgers in file'); const to=meta.to||$('#tbTo')?.value||lastQEnd(); if(meta.company&&norm(meta.company)!==norm(c.tallyName||c.name)) toast(`Note: file is for “${meta.company}”`,4000);
+  const id=`${c.id}_${to.replace(/-/g,'')}`; const doc={cid:c.id,to,from:meta.from||fyStart(to),rows,source:meta.company?'Tally bridge':'uploaded file',at:new Date().toISOString()};
+  if(JSON.stringify(doc).length>240000){ toast('Trial balance too large to store – contact support'); return; }
+  await Store.set('tbs',id,doc); S.tbSel=id; await logIt(`Trial balance loaded to ${to} (${rows.length} rows)`); toast('Trial balance loaded'); }catch(e){ toast(e.message||'Could not read file',4000); } });
+document.addEventListener('click',async e=>{
+  const a=e.target.closest('[data-act]'); if(!a) return; const act=a.dataset.act; const c=co(); if(!c) return;
+  const saveCo=async patch=>{ const {id,...rest}={...c,...patch}; await Store.set('companies',c.id,rest); };
+  try{ switch(act){
+    case 'bankAddShow': $('#bankAddBox').style.display='flex'; break;
+    case 'bankAdd': { const l=$('#bkLed').value.trim(); if(!l){toast('Enter the ledger name');break;} const banks=[...(c.banks||[]).filter(b=>b.ledger!==l),{ledger:l,last4:$('#bkL4').value.trim()}]; await saveCo({banks}); S.bankSel=l; toast('Account saved'); break; }
+    case 'bankPick': S.bankSel=a.dataset.l; S.books=null; S.stmtMsg=''; render(); break;
+    case 'stmtPick': $('#stmtIn').click(); break;
+    case 'txFilter': S.txFilter=a.dataset.f; render(); break;
+    case 'txOk': await updateTx([a.dataset.id],{status:'ready'}); break;
+    case 'txIgnore': await updateTx([a.dataset.id],{status:'ignored'}); break;
+    case 'txUndo': await updateTx([a.dataset.id],{status:'new'}); break;
+    case 'txPosted': await updateTx([a.dataset.id],{status:'posted'}); break;
+    case 'txOkAll': { const ids=monthTx().filter(t=>(t.status||'new')==='new'&&t.ledger).map(t=>t.id); await updateTx(ids,{status:'ready'}); toast(`${ids.length} marked ready`); break; }
+    case 'txExport': { const ready=allTx(S.bankSel).filter(t=>t.status==='ready'); const bad=ready.filter(t=>!t.ledger); if(bad.length){toast('Some entries have no ledger');break;}
+      const stamp=new Date().toISOString().replace(/[-:T]/g,'').slice(0,14); const fn=`tally_${(c.code||c.short||'CO').replace(/[^A-Za-z0-9]/g,'')}_${stamp}_bank.txt`;
+      const r=await saveFile(fn,bankXML(ready,c,S.bankSel),'Tally bank file'); if(r==='declined') break;
+      await updateTx(ready.map(t=>t.id),{status:'sent',sentFile:fn});
+      for(const t of ready.filter(t=>t.billId)){ const b=S.bills.find(x=>x.id===t.billId); if(b){ const {id,...rest}=b; await Store.set('bills',b.id,{...rest,paidTxn:t.id,paidOn:t.date}); } }
+      await logIt(`Bank file ${fn}: ${ready.length} voucher(s)`); break; }
+    case 'txRule': { const t=allTx(S.bankSel).find(x=>x.id===a.dataset.id); openModal(`<h3>Remember a rule</h3><p class="muted">Every future entry whose narration contains this text gets this ledger.</p><p class="muted">${esc(t.narr)}</p>
+      <div class="grid2"><label class="f">Narration contains<input id="ruleK" value="${esc(guessKeyword(t.narr))}"></label><label class="f">Ledger in Tally<input id="ruleL" list="ledList3" value="${esc(t.ledger||'')}"></label></div>
+      <label class="row" style="gap:6px;margin-top:8px"><input type="checkbox" id="ruleD" checked> Only for money ${t.dr?'going out':'coming in'}</label>
+      <div class="row" style="margin-top:10px"><button class="primary" data-act="ruleSave" data-dir="${t.dr?'dr':'cr'}">Save rule &amp; apply</button><button data-act="close">Cancel</button></div>`); break; }
+    case 'ruleSave': { const k=$('#ruleK').value.trim(), l=$('#ruleL').value.trim(); if(!k||!l){toast('Fill both');break;} const rule={k,ledger:l,dir:$('#ruleD').checked?a.dataset.dir:''}; const rules=[rule,...(c.bankRules||[]).filter(r=>r.k!==k)]; await saveCo({bankRules:rules}); closeModal();
+      const ids=allTx(S.bankSel).filter(t=>(t.status||'new')==='new'&&String(t.narr).toUpperCase().includes(k.toUpperCase())&&(!rule.dir||rule.dir===(t.dr?'dr':'cr'))).map(t=>t.id);
+      await updateTx(ids,t=>({ledger:l,kind:'rule',reason:`Your rule: “${k}”`})); toast(`Rule saved – applied to ${ids.length} entr${ids.length===1?'y':'ies'}`); break; }
+    case 'reqBook': { const [y,m]=S.month.split('-').map(Number); await reqFile('bankbook',{ledger:S.bankSel,from:`${S.month}-01`,to:isoDate(new Date(y,m,0))}); break; }
+    case 'loadBook': $('#bookIn').click(); break;
+    case 'markInBooks': { const r=matchBank(monthTx().filter(t=>t.status!=='ignored'),S.books.filter(b=>b.date.startsWith(S.month))); const ids=r.matched.filter(m=>!['inbooks','posted'].includes(m.t.status)).map(m=>m.t.id); await updateTx(ids,{status:'inbooks'}); toast(`${ids.length} marked as already in Tally`); break; }
+    case 'linkPay': { const t=allTx(S.bankSel).find(x=>x.id===a.dataset.id); const d=new Date(t.date); const pm=d.getDate()<=10?new Date(d.getFullYear(),d.getMonth()-1,1):new Date(d.getFullYear(),d.getMonth(),1);
+      const per=`${pm.getFullYear()}-${String(pm.getMonth()+1).padStart(2,'0')}`; const opts=t.kind==='tds'?[`TDSPAY_${per}`]:[`GSTR3B_${per}`,`PMT06_${per}`,`GSTR3BQ_${per}`];
+      openModal(`<h3>Record payment in filing calendar</h3><p>${esc(t.date)} · ₹${fmt(t.dr)} · ${esc(t.narr)}</p><label class="f">Which filing?<select id="lpKey">${opts.map(k=>`<option>${k}</option>`).join('')}</select></label><label class="f" style="margin-top:8px">Challan / CIN / CPIN (from narration or challan)<input id="lpAck" value="${esc(t.ref||'')}"></label>
+      <div class="row" style="margin-top:10px"><button class="primary" data-act="lpSave" data-date="${t.date}" data-amt="${t.dr}" data-kind="${t.kind}">Save</button><button data-act="close">Cancel</button></div>`); break; }
+    case 'lpSave': { const key=$('#lpKey').value; await setTask(c.id,key,{status:a.dataset.kind==='tds'?'filed':'started',filedOn:a.dataset.date,ack:$('#lpAck').value,amount:a.dataset.amt,note:'From bank statement'}); await logIt(`Bank payment linked to ${key}`); closeModal(); toast('Recorded'); break; }
+    case 'acctSub': S.acctSub=a.dataset.s; render(); break;
+    case 'reqTB': { const to=$('#tbTo').value; if(!to){toast('Pick the period end');break;} await reqFile('tb',{from:fyStart(to),to}); break; }
+    case 'loadTB': $('#tbIn').click(); break;
+    case 'tbDel': await Store.del('tbs',S.tbSel); S.tbSel=''; break;
+    case 'tbTemplate': await saveFile('trial_balance_template.csv',csv([['Name','Primary group','Sub group','Debit','Credit'],['Share Capital','Capital Account','','','1000000'],['HDFC Bank','Current Assets','Bank Accounts','250000',''],['Sales','Sales Accounts','','','800000'],['Closing Stock','Current Assets','Stock-in-Hand','150000','']])); break;
+    case 'fsReport': { const tb=S.tbs.find(x=>x.id===S.tbSel); await saveFile(`accounts_${c.code||'co'}_${tb.to}.html`,fsReportHTML(c,tb)); break; }
+    case 'fsCsv': { const tb=S.tbs.find(x=>x.id===S.tbSel); const fs=snapFS(tb,S.inclAdj); const rows=[['Section','Item','Amount']]; Object.entries(fs.pl).forEach(([k,v])=>rows.push(['P&L YTD',k,v])); Object.entries(fs.L).forEach(([k,v])=>rows.push(['Liabilities',k,v])); Object.entries(fs.A).forEach(([k,v])=>rows.push(['Assets',k,v])); { const cf=cfFor(tb).ytd; ['op','inv','fin'].forEach(k=>cf.L[k].forEach(l=>rows.push(['Cash flow YTD',l[0],l[1]]))); rows.push(['Cash flow YTD','Net change in cash',cf.net]); } fs.rows.forEach(r=>rows.push(['TB',r.name+' ['+r.primary+']',r.net])); await saveFile(`accounts_${c.code||'co'}_${tb.to}.csv`,csv(rows)); break; }
+    case 'adjPick': { $('#adjKind').value=a.dataset.k; $('#adjKind').dispatchEvent(new Event('change',{bubbles:true})); $('#adjAmt').focus(); break; }
+    case 'adjAdd': { const amt=+String($('#adjAmt').value).replace(/,/g,''); const dr=$('#adjDr').value.trim(), cr=$('#adjCr').value.trim(); if(!(amt>0)||!dr||!cr||dr.startsWith('(')||cr.startsWith('(')){ toast('Enter amount and both ledgers'); break; }
+      const id=uid(); await Store.set('adj',id,{cid:c.id,kind:$('#adjKind').value,date:$('#adjDate').value,drLedger:dr,crLedger:cr,amount:amt,narration:$('#adjNar').value,status:'pending',at:new Date().toISOString()}); await logIt(`Provision added: ${dr} / ${cr} ₹${fmt(amt)}`); toast('Provision added'); break; }
+    case 'adjDel': await Store.del('adj',a.dataset.id); break;
+    case 'adjPosted': { const j=S.adjs.find(x=>x.id===a.dataset.id); const {id,...rest}=j; await Store.set('adj',j.id,{...rest,status:'posted'}); break; }
+    case 'adjExport': { const p=S.adjs.filter(j=>j.status==='pending'); const stamp=new Date().toISOString().replace(/[-:T]/g,'').slice(0,14); const fn=`tally_${(c.code||c.short||'CO').replace(/[^A-Za-z0-9]/g,'')}_${stamp}_journal.txt`;
+      const r=await saveFile(fn,journalXML(p,c),'Tally journal file'); if(r==='declined') break; for(const j of p){ const {id,...rest}=j; await Store.set('adj',j.id,{...rest,status:'sent',sentFile:fn}); } await logIt(`Journal file ${fn}: ${p.length} provision(s)`); break; }
+  }}catch(err){ console.error(err); toast('Something went wrong: '+(err.message||err)); }
+});
+const txTimers={};
+document.addEventListener('input',e=>{ const el=e.target;
+  if(el.dataset.tx){ const id=el.dataset.tx, v=el.value; clearTimeout(txTimers[id]); S.editing='tx'; txTimers[id]=setTimeout(async()=>{ S.editing=null; await updateTx([id],{ledger:v,reason:'Chosen by you',kind:allTx(S.bankSel).find(t=>t.id===id)?.kind==='unknown'?'manual':allTx(S.bankSel).find(t=>t.id===id)?.kind}); },900); }
+  if(el.id==='csOv'){ S.closeStockOv=el.value; clearTimeout(txTimers.cs); txTimers.cs=setTimeout(()=>render(),700); } });
+document.addEventListener('change',e=>{ const el=e.target;
+  if(el.id==='tbSel'){ S.tbSel=el.value; S.closeStockOv=''; render(); }
+  if(el.id==='inclAdj'){ S.inclAdj=el.checked; render(); }
+  if(el.id==='adjKind'){ const t=ADJ_T.find(x=>x.k===el.value); const d=$('#adjDr'), c=$('#adjCr'); if(d&&!d.value) d.placeholder=t.dr; if(c&&!c.value) c.placeholder=t.cr; if(d&&t.dr&&!t.dr.startsWith('(')&&!d.value) d.value=findLedger(t.dr)||t.dr; if(c&&t.cr&&!t.cr.startsWith('(')&&!c.value) c.value=findLedger(t.cr)||t.cr; $('#adjTip').style.display=t.tds?'block':'none'; } });
+
+(async()=>{
+  const h=location.hash.slice(1); if(TABS.some(t=>t[0]===h)) S.tab=h;
+  render(); await Store.init(); subscribeAll(); render();
+})();
+</script>
+<script>
+if('serviceWorker' in navigator && location.protocol==='https:'){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
+</script>
+</body>
+</html>

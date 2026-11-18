@@ -1,0 +1,14 @@
+{
+  "name": "Kaveri Accounts Desk",
+  "short_name": "Accounts Desk",
+  "description": "Bills to Tally, bank statements, GST & TDS calendar, quarterly accounts",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FFF6EC",
+  "theme_color": "#FFCF9E",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}
